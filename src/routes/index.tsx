@@ -1,24 +1,128 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { CalendarCheck, Clock, Users, ShieldCheck } from "lucide-react";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
+import { Button } from "@/components/ui/button";
+import { PLAN_LIST } from "@/lib/plans";
+
 export const Route = createFileRoute("/")({
-  component: Index,
+  head: () => ({
+    meta: [
+      { title: "Cadence — Smart Scheduling for Modern Businesses" },
+      {
+        name: "description",
+        content:
+          "Cadence gives salons, clinics, spas and practices a booking page, a shared calendar and customer records in one calm workspace.",
+      },
+      { property: "og:title", content: "Cadence — Smart Scheduling for Modern Businesses" },
+      {
+        property: "og:description",
+        content:
+          "A booking page, a shared team calendar and customer records in one calm workspace.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
+  component: Landing,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
+const highlights = [
+  {
+    icon: CalendarCheck,
+    title: "One shared calendar",
+    body: "Day, week and month views with every staff member in their own column.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "No double bookings",
+    body: "Overlapping appointments are blocked by the database itself, not just the screen.",
+  },
+  {
+    icon: Users,
+    title: "Customers remembered",
+    body: "Visit history, spend, no-shows, tags and private notes on every client.",
+  },
+  {
+    icon: Clock,
+    title: "Real availability",
+    body: "Opening hours, staff shifts, breaks and time off feed the booking page.",
+  },
+];
+
+function Landing() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
+    <div className="min-h-screen bg-background">
+      <header className="mx-auto flex max-w-6xl items-center justify-between px-5 py-6">
+        <span className="font-display text-xl font-semibold text-primary">Cadence</span>
+        <nav className="flex items-center gap-2">
+          <Button asChild variant="ghost" size="sm">
+            <Link to="/auth">Sign in</Link>
+          </Button>
+          <Button asChild size="sm">
+            <Link to="/auth">Get started</Link>
+          </Button>
+        </nav>
+      </header>
+
+      <main>
+        <section className="mx-auto max-w-6xl px-5 pb-16 pt-10 sm:pt-20">
+          <p className="text-sm font-medium uppercase tracking-widest text-muted-foreground">
+            Scheduling software
+          </p>
+          <h1 className="mt-4 max-w-3xl text-4xl leading-tight font-semibold sm:text-6xl">
+            Smart scheduling for modern businesses.
+          </h1>
+          <p className="mt-5 max-w-xl text-lg text-muted-foreground">
+            Cadence runs the diary for salons, clinics, spas and practices — online booking, a
+            shared team calendar and customer records that stay in step.
+          </p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Button asChild size="lg">
+              <Link to="/auth">Start your free trial</Link>
+            </Button>
+            <Button asChild size="lg" variant="outline">
+              <Link to="/pricing">See pricing</Link>
+            </Button>
+          </div>
+        </section>
+
+        <section className="border-y border-border bg-secondary/40 py-14">
+          <div className="mx-auto grid max-w-6xl gap-6 px-5 sm:grid-cols-2 lg:grid-cols-4">
+            {highlights.map((h) => (
+              <div key={h.title} className="surface p-5">
+                <h.icon className="h-5 w-5 text-primary" aria-hidden />
+                <h2 className="mt-3 text-base font-semibold">{h.title}</h2>
+                <p className="mt-1 text-sm text-muted-foreground">{h.body}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-6xl px-5 py-16">
+          <h2 className="text-2xl font-semibold">Simple monthly plans</h2>
+          <div className="mt-6 grid gap-5 md:grid-cols-3">
+            {PLAN_LIST.map((plan) => (
+              <div key={plan.id} className="surface flex flex-col p-6">
+                <h3 className="text-lg font-semibold">{plan.name}</h3>
+                <p className="mt-1 text-sm text-muted-foreground">{plan.tagline}</p>
+                <p className="mt-4 text-3xl font-semibold">
+                  ${plan.price}
+                  <span className="text-base font-normal text-muted-foreground">/mo</span>
+                </p>
+                <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
+                  {plan.features.map((f) => (
+                    <li key={f}>{f}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </section>
+      </main>
+
+      <footer className="border-t border-border py-8 text-center text-sm text-muted-foreground">
+        © {new Date().getFullYear()} Cadence
+      </footer>
     </div>
   );
 }
