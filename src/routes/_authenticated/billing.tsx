@@ -15,8 +15,10 @@ export const Route = createFileRoute("/_authenticated/billing")({
 
 function BillingPage() {
   const { data: workspace } = useWorkspace();
+  const { data: credits } = useCredits();
   const business = workspace?.business;
   const plan = business ? PLANS[business.plan] : undefined;
+  const paid = isPaidPlan(business?.plan_status);
 
   const monthStart = new Date();
   monthStart.setDate(1);
