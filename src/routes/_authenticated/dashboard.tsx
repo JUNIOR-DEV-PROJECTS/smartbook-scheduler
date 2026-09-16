@@ -156,7 +156,10 @@ function DashboardBody({ onEdit }: { onEdit: (a: AppointmentRow) => void }) {
 
   async function setStatus(id: string, status: AppointmentStatus) {
     const { error } = await supabase.from("appointments").update({ status }).eq("id", id);
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     await queryClient.invalidateQueries({ queryKey: ["appointments"] });
     toast.success("Appointment updated.");
   }

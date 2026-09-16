@@ -55,7 +55,10 @@ function AppointmentsPage() {
 
   async function updateStatus(id: string, next: AppointmentStatus) {
     const { error } = await supabase.from("appointments").update({ status: next }).eq("id", id);
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     await queryClient.invalidateQueries({ queryKey: ["appointments"] });
     toast.success("Appointment updated.");
   }
