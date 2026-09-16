@@ -365,6 +365,7 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string
+          credits: number
           email: string | null
           full_name: string | null
           id: string
@@ -373,6 +374,7 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           created_at?: string
+          credits?: number
           email?: string | null
           full_name?: string | null
           id: string
@@ -381,6 +383,7 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           created_at?: string
+          credits?: number
           email?: string | null
           full_name?: string | null
           id?: string
@@ -619,7 +622,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      consume_credit: { Args: never; Returns: number }
     }
     Enums: {
       app_role: "owner" | "manager" | "staff"
