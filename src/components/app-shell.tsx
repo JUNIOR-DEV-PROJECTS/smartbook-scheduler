@@ -96,9 +96,11 @@ export function AppShell({
   children: ReactNode;
 }) {
   const { data: workspace, isLoading, isError } = useWorkspace();
+  const { data: credits } = useCredits();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
+  const [showUpgrade, setShowUpgrade] = useState(false);
 
   async function signOut() {
     await queryClient.cancelQueries();

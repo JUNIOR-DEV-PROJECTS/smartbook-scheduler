@@ -5,8 +5,9 @@ import { AppShell, RequireManager } from "@/components/app-shell";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
-import { PLANS, PLAN_LIST } from "@/lib/plans";
+import { PLANS, PLAN_LIST, annualPrice } from "@/lib/plans";
 import { useWorkspace } from "@/hooks/useWorkspace";
+import { INITIAL_CREDITS, isPaidPlan, useCredits } from "@/hooks/useCredits";
 
 export const Route = createFileRoute("/_authenticated/billing")({
   component: BillingPage,
