@@ -469,7 +469,8 @@ export function AppointmentDialog({
           </Button>
         </DialogFooter>
       </DialogContent>
-      <UpgradeDialog open={showUpgrade} onOpenChange={setShowUpgrade} />
     </Dialog>
+    <UpgradeDialog open={showUpgrade} onOpenChange={setShowUpgrade} />
+    </>
   );
 }
