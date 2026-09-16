@@ -26,6 +26,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { initials } from "@/lib/format";
 import { ROLE_LABEL, useWorkspace, type AppRole } from "@/hooks/useWorkspace";
+import { isPaidPlan, useCredits } from "@/hooks/useCredits";
+import { UpgradeDialog } from "@/components/upgrade-dialog";
 
 const NAV = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
