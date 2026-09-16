@@ -75,8 +75,14 @@ function AuthPage() {
       password,
     });
     setBusy(false);
-    if (error) return toast.error(friendlyError(error.message));
-    if (!data.session) return toast.error("Sign-in didn't complete. Please try again.");
+    if (error) {
+      toast.error(friendlyError(error.message));
+      return;
+    }
+    if (!data.session) {
+      toast.error("Sign-in didn't complete. Please try again.");
+      return;
+    }
     await queryClient.invalidateQueries();
     navigate({ to: "/dashboard", replace: true });
   }
@@ -94,7 +100,10 @@ function AuthPage() {
       },
     });
     setBusy(false);
-    if (error) return toast.error(friendlyError(error.message));
+    if (error) {
+      toast.error(friendlyError(error.message));
+      return;
+    }
 
     if (data.session) {
       toast.success("Account created — you have 2 complimentary credits.");
