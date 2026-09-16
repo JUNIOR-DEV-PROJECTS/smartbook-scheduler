@@ -33,6 +33,8 @@ import {
   type AppointmentRow,
   type Business,
 } from "@/hooks/useWorkspace";
+import { consumeCredit, isPaidPlan, useCredits, NoCreditsError } from "@/hooks/useCredits";
+import { UpgradeDialog } from "@/components/upgrade-dialog";
 
 interface Props {
   business: Business;

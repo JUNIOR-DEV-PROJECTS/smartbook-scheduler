@@ -78,7 +78,7 @@ function Landing() {
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Button asChild size="lg">
-              <Link to="/auth">Start your free trial</Link>
+              <Link to="/auth">Get started free</Link>
             </Button>
             <Button asChild size="lg" variant="outline">
               <Link to="/pricing">See pricing</Link>
