@@ -67,6 +67,12 @@ export function AppointmentDialog({
   const [phone, setPhone] = useState("");
   const [notes, setNotes] = useState("");
   const [busy, setBusy] = useState(false);
+  const [showUpgrade, setShowUpgrade] = useState(false);
+
+  const { data: credits } = useCredits();
+  const paid = isPaidPlan(business.plan_status);
+  /** New bookings cost one complimentary credit unless the business is on a paid plan. */
+  const outOfCredits = !paid && !appointment && (credits ?? 0) <= 0;
 
   const { data: services, isLoading: loadingServices } = useServices(business.id);
   const { data: staffList, isLoading: loadingStaff } = useStaff(business.id);
