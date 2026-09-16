@@ -193,6 +193,10 @@ export function AppointmentDialog({
       toast.error("Pick a service, a team member and an available time.");
       return;
     }
+    if (outOfCredits) {
+      setShowUpgrade(true);
+      return;
+    }
     setBusy(true);
     try {
       let finalCustomerId: string | null =
