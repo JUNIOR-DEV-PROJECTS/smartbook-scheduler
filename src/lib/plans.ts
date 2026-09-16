@@ -12,6 +12,11 @@ export interface Plan {
   customBranding: boolean;
 }
 
+/** Annual billing: pay for 10 months, get 12. */
+export function annualPrice(plan: Plan) {
+  return plan.price * 10;
+}
+
 export const PLANS: Record<PlanId, Plan> = {
   starter: {
     id: "starter",
@@ -32,7 +37,7 @@ export const PLANS: Record<PlanId, Plan> = {
   },
   pro: {
     id: "pro",
-    name: "Pro",
+    name: "Professional",
     price: 39,
     tagline: "For growing teams with a full book.",
     staffSeats: 10,

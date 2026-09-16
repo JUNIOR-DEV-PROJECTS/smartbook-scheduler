@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -7,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -24,33 +24,75 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
+function friendlyError(message: string) {
+  const m = message.toLowerCase();
+  if (m.includes("invalid login credentials")) return "That email and password don't match.";
+  if (m.includes("email not confirmed")) return "Confirm your email address, then sign in.";
+  if (m.includes("already registered") || m.includes("already been registered"))
+    return "That email already has an account — sign in instead.";
+  if (m.includes("password")) return message;
+  return message;
+}
+
 function AuthPage() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [busy, setBusy] = useState(false);
+  const [tab, setTab] = useState("signin");
 
+  // Send anyone who already has a live session straight into the app, and react
+  // to a session arriving (sign-in, token restore) without racing the redirect.
   useEffect(() => {
+    let active = true;
+
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/dashboard", replace: true });
+      if (active && data.session) navigate({ to: "/dashboard", replace: true });
     });
+
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!active) return;
+      if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session) {
+        navigate({ to: "/dashboard", replace: true });
+      }
+    });
+
+    return () => {
+      active = false;
+      sub.subscription.unsubscribe();
+    };
   }, [navigate]);
 
   async function signIn(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    // Clear anything cached from a previous account before the new session lands.
+    queryClient.clear();
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password,
+    });
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(friendlyError(error.message));
+      return;
+    }
+    if (!data.session) {
+      toast.error("Sign-in didn't complete. Please try again.");
+      return;
+    }
+    await queryClient.invalidateQueries();
     navigate({ to: "/dashboard", replace: true });
   }
 
   async function signUp(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
-    const { error } = await supabase.auth.signUp({
-      email,
+    queryClient.clear();
+    const { data, error } = await supabase.auth.signUp({
+      email: email.trim(),
       password,
       options: {
         emailRedirectTo: `${window.location.origin}/dashboard`,
@@ -58,16 +100,21 @@ function AuthPage() {
       },
     });
     setBusy(false);
-    if (error) return toast.error(error.message);
-    toast.success("Account created. You can sign in now.");
-  }
-
-  async function google() {
-    try {
-      await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Google sign-in failed");
+    if (error) {
+      toast.error(friendlyError(error.message));
+      return;
     }
+
+    if (data.session) {
+      toast.success("Account created — you have 2 complimentary credits.");
+      await queryClient.invalidateQueries();
+      navigate({ to: "/dashboard", replace: true });
+      return;
+    }
+
+    toast.success("Check your email to confirm your account, then sign in.");
+    setTab("signin");
+    setPassword("");
   }
 
   return (
@@ -78,7 +125,7 @@ function AuthPage() {
           Sign in to manage your diary, team and customers.
         </p>
 
-        <Tabs defaultValue="signin" className="mt-6">
+        <Tabs value={tab} onValueChange={setTab} className="mt-6">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="signin">Sign in</TabsTrigger>
             <TabsTrigger value="signup">Create account</TabsTrigger>
@@ -91,6 +138,7 @@ function AuthPage() {
                 <Input
                   id="email"
                   type="email"
+                  autoComplete="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -101,6 +149,7 @@ function AuthPage() {
                 <Input
                   id="password"
                   type="password"
+                  autoComplete="current-password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -123,6 +172,7 @@ function AuthPage() {
                 <Input
                   id="email2"
                   type="email"
+                  autoComplete="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -133,6 +183,7 @@ function AuthPage() {
                 <Input
                   id="password2"
                   type="password"
+                  autoComplete="new-password"
                   required
                   minLength={6}
                   value={password}
@@ -142,16 +193,12 @@ function AuthPage() {
               <Button className="w-full" disabled={busy}>
                 {busy ? "Creating…" : "Create account"}
               </Button>
+              <p className="text-center text-xs text-muted-foreground">
+                New accounts include 2 complimentary credits.
+              </p>
             </form>
           </TabsContent>
         </Tabs>
-
-        <div className="my-5 flex items-center gap-3 text-xs text-muted-foreground">
-          <span className="h-px flex-1 bg-border" /> or <span className="h-px flex-1 bg-border" />
-        </div>
-        <Button variant="outline" className="w-full" onClick={google}>
-          Continue with Google
-        </Button>
       </div>
     </div>
   );

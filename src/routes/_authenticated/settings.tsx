@@ -59,7 +59,10 @@ function SettingsPage() {
     setBusy(true);
     const { error } = await supabase.from("businesses").update(form).eq("id", business.id);
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     await queryClient.invalidateQueries({ queryKey: ["workspace"] });
     toast.success("Settings saved.");
   }

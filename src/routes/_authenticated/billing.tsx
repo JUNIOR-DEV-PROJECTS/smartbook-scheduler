@@ -5,8 +5,9 @@ import { AppShell, RequireManager } from "@/components/app-shell";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
-import { PLANS, PLAN_LIST } from "@/lib/plans";
+import { PLANS, PLAN_LIST, annualPrice } from "@/lib/plans";
 import { useWorkspace } from "@/hooks/useWorkspace";
+import { INITIAL_CREDITS, isPaidPlan, useCredits } from "@/hooks/useCredits";
 
 export const Route = createFileRoute("/_authenticated/billing")({
   component: BillingPage,
@@ -14,8 +15,10 @@ export const Route = createFileRoute("/_authenticated/billing")({
 
 function BillingPage() {
   const { data: workspace } = useWorkspace();
+  const { data: credits } = useCredits();
   const business = workspace?.business;
   const plan = business ? PLANS[business.plan] : undefined;
+  const paid = isPaidPlan(business?.plan_status);
 
   const monthStart = new Date();
   monthStart.setDate(1);
@@ -54,9 +57,10 @@ function BillingPage() {
                 </div>
                 <Badge variant="secondary">{business.plan_status}</Badge>
               </div>
-              {business.plan_status === "trialing" ? (
+              {!paid ? (
                 <p className="mt-3 text-sm text-muted-foreground">
-                  Trial ends {new Date(business.trial_ends_at).toLocaleDateString()}.
+                  Complimentary credits left: <strong>{credits ?? 0}</strong> of {INITIAL_CREDITS}.
+                  Each new booking uses one. When they run out, choose a plan below to continue.
                 </p>
               ) : null}
 
@@ -78,7 +82,13 @@ function BillingPage() {
               {PLAN_LIST.map((p) => (
                 <div key={p.id} className="surface p-5">
                   <h3 className="font-semibold">{p.name}</h3>
-                  <p className="mt-1 text-2xl font-semibold">${p.price}</p>
+                  <p className="mt-1 text-2xl font-semibold">
+                    ${p.price}
+                    <span className="text-sm font-normal text-muted-foreground">/mo</span>
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    or ${annualPrice(p)}/yr — 2 months free
+                  </p>
                   <ul className="mt-3 space-y-1.5 text-sm text-muted-foreground">
                     {p.features.map((f) => (
                       <li key={f}>{f}</li>

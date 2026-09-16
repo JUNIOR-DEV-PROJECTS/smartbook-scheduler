@@ -26,6 +26,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { initials } from "@/lib/format";
 import { ROLE_LABEL, useWorkspace, type AppRole } from "@/hooks/useWorkspace";
+import { isPaidPlan, useCredits } from "@/hooks/useCredits";
+import { UpgradeDialog } from "@/components/upgrade-dialog";
 
 const NAV = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -89,14 +91,16 @@ export function AppShell({
   children,
 }: {
   title: string;
-  description?: string;
+  description?: string | undefined;
   actions?: ReactNode;
   children: ReactNode;
 }) {
   const { data: workspace, isLoading, isError } = useWorkspace();
+  const { data: credits } = useCredits();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
+  const [showUpgrade, setShowUpgrade] = useState(false);
 
   async function signOut() {
     await queryClient.cancelQueries();
@@ -207,6 +211,17 @@ export function AppShell({
             </div>
           </div>
           <div className="flex shrink-0 items-center gap-2">
+            {!isPaidPlan(business.plan_status) && credits !== null && credits !== undefined ? (
+              <button
+                type="button"
+                onClick={() => setShowUpgrade(true)}
+                className="hidden sm:inline-flex"
+              >
+                <Badge variant={credits > 0 ? "secondary" : "destructive"}>
+                  {credits > 0 ? `${credits} credits left` : "Out of credits — upgrade"}
+                </Badge>
+              </button>
+            ) : null}
             <Badge variant="secondary" className="hidden sm:inline-flex">
               {initials(business.name)} · {ROLE_LABEL[role]}
             </Badge>
@@ -216,6 +231,7 @@ export function AppShell({
 
         <main className="px-4 py-6 sm:px-6">{children}</main>
       </div>
+      <UpgradeDialog open={showUpgrade} onOpenChange={setShowUpgrade} />
     </div>
   );
 }
