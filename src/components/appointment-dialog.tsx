@@ -240,12 +240,28 @@ export function AppointmentDialog({
         throw error;
       }
 
+      let left: number | null = null;
+      if (!appointment && !paid) {
+        left = await consumeCredit();
+        await queryClient.invalidateQueries({ queryKey: ["credits"] });
+      }
+
       await queryClient.invalidateQueries({ queryKey: ["appointments"] });
       await queryClient.invalidateQueries({ queryKey: ["customers"] });
-      toast.success(appointment ? "Appointment updated." : "Appointment booked.");
+      toast.success(
+        appointment
+          ? "Appointment updated."
+          : left === null
+            ? "Appointment booked."
+            : `Appointment booked. ${left} complimentary ${left === 1 ? "credit" : "credits"} left.`,
+      );
       onOpenChange(false);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Could not save the appointment");
+      if (err instanceof NoCreditsError) {
+        setShowUpgrade(true);
+      } else {
+        toast.error(err instanceof Error ? err.message : "Could not save the appointment");
+      }
     } finally {
       setBusy(false);
     }
