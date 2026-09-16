@@ -1,8 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { Check } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { PLAN_LIST } from "@/lib/plans";
+import { PLAN_LIST, annualPrice } from "@/lib/plans";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/pricing")({
   head: () => ({
@@ -11,12 +13,13 @@ export const Route = createFileRoute("/pricing")({
       {
         name: "description",
         content:
-          "Cadence plans: Starter $19, Pro $39 and Business $79 a month, with a 14-day free trial on every plan.",
+          "Cadence plans: Starter $19, Professional $39 and Business $79 a month, billed monthly or annually. New accounts get 2 complimentary credits.",
       },
       { property: "og:title", content: "Pricing — Cadence scheduling plans" },
       {
         property: "og:description",
-        content: "Starter $19, Pro $39 and Business $79 a month. Free 14-day trial.",
+        content:
+          "Starter $19, Professional $39 and Business $79 a month. Two complimentary credits on sign-up.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -26,6 +29,8 @@ export const Route = createFileRoute("/pricing")({
 });
 
 function Pricing() {
+  const [cycle, setCycle] = useState<"monthly" | "annual">("monthly");
+
   return (
     <div className="min-h-screen bg-background">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-5 py-6">
@@ -39,16 +44,36 @@ function Pricing() {
       <main className="mx-auto max-w-6xl px-5 pb-20">
         <h1 className="text-4xl font-semibold">Pricing</h1>
         <p className="mt-3 max-w-lg text-muted-foreground">
-          Every plan starts with a 14-day free trial. No card needed to begin.
+          Every new account starts with 2 complimentary credits. After that, pick the plan that
+          fits your team.
         </p>
-        <div className="mt-10 grid gap-6 md:grid-cols-3">
+
+        <div className="mt-8 inline-flex rounded-lg border border-border p-1">
+          {(["monthly", "annual"] as const).map((c) => (
+            <button
+              key={c}
+              type="button"
+              onClick={() => setCycle(c)}
+              className={cn(
+                "rounded-md px-4 py-1.5 text-sm transition-colors",
+                cycle === c ? "bg-primary text-primary-foreground" : "text-muted-foreground",
+              )}
+            >
+              {c === "annual" ? "Annual · 2 months free" : "Monthly"}
+            </button>
+          ))}
+        </div>
+
+        <div className="mt-8 grid gap-6 md:grid-cols-3">
           {PLAN_LIST.map((plan) => (
             <div key={plan.id} className="surface flex flex-col p-6">
               <h2 className="text-lg font-semibold">{plan.name}</h2>
               <p className="mt-1 text-sm text-muted-foreground">{plan.tagline}</p>
               <p className="mt-5 text-4xl font-semibold">
-                ${plan.price}
-                <span className="text-base font-normal text-muted-foreground">/mo</span>
+                ${cycle === "monthly" ? plan.price : annualPrice(plan)}
+                <span className="text-base font-normal text-muted-foreground">
+                  {cycle === "monthly" ? "/mo" : "/yr"}
+                </span>
               </p>
               <ul className="mt-5 flex-1 space-y-2.5 text-sm">
                 {plan.features.map((f) => (
@@ -59,7 +84,7 @@ function Pricing() {
                 ))}
               </ul>
               <Button asChild className="mt-6" variant={plan.id === "pro" ? "default" : "outline"}>
-                <Link to="/auth">Start free trial</Link>
+                <Link to="/auth">Get started</Link>
               </Button>
             </div>
           ))}
