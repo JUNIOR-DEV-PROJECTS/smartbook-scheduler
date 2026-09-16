@@ -622,7 +622,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      consume_credit: { Args: never; Returns: number }
+      [_ in never]: never
     }
     Enums: {
       app_role: "owner" | "manager" | "staff"
