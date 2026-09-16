@@ -279,6 +279,23 @@ export function AppointmentDialog({
           </DialogDescription>
         </DialogHeader>
 
+        {outOfCredits ? (
+          <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-4 text-sm">
+            <p className="font-medium">You've used both complimentary credits</p>
+            <p className="mt-1 text-muted-foreground">
+              Choose a plan to keep booking appointments.
+            </p>
+            <Button className="mt-3" size="sm" onClick={() => setShowUpgrade(true)}>
+              See plans
+            </Button>
+          </div>
+        ) : !paid && !appointment && credits !== null && credits !== undefined ? (
+          <p className="text-xs text-muted-foreground">
+            {credits} complimentary {credits === 1 ? "credit" : "credits"} left — this booking uses
+            one.
+          </p>
+        ) : null}
+
         {loading ? (
           <div className="space-y-3">
             <Skeleton className="h-10 w-full" />
