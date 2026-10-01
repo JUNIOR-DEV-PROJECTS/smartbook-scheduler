@@ -11,6 +11,23 @@ import { supabase } from "@/integrations/supabase/client";
 import { slugify } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
+  head: () => ({
+    meta: [
+      { title: "Onboarding — DMRJ Scheduling" },
+      {
+        name: "description",
+        content:
+          "Onboarding in DMRJ Scheduling. Appointment scheduling software for salons, clinics, spas and practices.",
+      },
+      { property: "og:title", content: "Onboarding — DMRJ Scheduling" },
+      {
+        property: "og:description",
+        content: "Appointment scheduling software for salons, clinics, spas and practices.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
   component: Onboarding,
 });
 

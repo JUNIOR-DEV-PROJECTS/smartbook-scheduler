@@ -79,17 +79,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Cadence — Smart Scheduling for Modern Businesses" },
+      { title: "DMRJ Scheduling — Smart scheduling for modern businesses." },
       {
         name: "description",
-        content:
-          "Online booking, calendar and customer management for salons, clinics, spas and practices.",
+        content: "Appointment scheduling software for salons, clinics, spas and practices.",
       },
-      { property: "og:title", content: "Cadence — Smart Scheduling for Modern Businesses" },
+      {
+        property: "og:title",
+        content: "DMRJ Scheduling — Smart scheduling for modern businesses.",
+      },
       {
         property: "og:description",
-        content:
-          "Online booking, calendar and customer management for salons, clinics, spas and practices.",
+        content: "Appointment scheduling software for salons, clinics, spas and practices.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

@@ -9,6 +9,23 @@ import { money } from "@/lib/format";
 import { useWorkspace } from "@/hooks/useWorkspace";
 
 export const Route = createFileRoute("/_authenticated/reports")({
+  head: () => ({
+    meta: [
+      { title: "Reports — DMRJ Scheduling" },
+      {
+        name: "description",
+        content:
+          "Reports in DMRJ Scheduling. Appointment scheduling software for salons, clinics, spas and practices.",
+      },
+      { property: "og:title", content: "Reports — DMRJ Scheduling" },
+      {
+        property: "og:description",
+        content: "Appointment scheduling software for salons, clinics, spas and practices.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
   component: ReportsPage,
 });
 
@@ -60,9 +77,7 @@ function ReportsPage() {
                 { label: "Revenue", value: money(revenue, currency) },
               ].map((c) => (
                 <div key={c.label} className="surface p-4">
-                  <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                    {c.label}
-                  </p>
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground">{c.label}</p>
                   <p className="mt-1.5 text-2xl font-semibold">{c.value}</p>
                 </div>
               ))}

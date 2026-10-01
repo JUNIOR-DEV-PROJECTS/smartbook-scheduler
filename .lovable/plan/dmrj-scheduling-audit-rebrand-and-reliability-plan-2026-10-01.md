@@ -13,7 +13,7 @@ Rebrand the existing application to **DMRJ Scheduling**, correct pricing and sub
    - Keep Starter at $19/month, Professional at $39/month, and Business at $79/month.
    - Remove the annual discount calculation and every “2 months free” claim.
    - Keep monthly pricing active and show Annual as disabled with “Annual billing is coming soon.”
-   - Add a reusable unavailable-checkout action that shows exactly: “Payment checkout is not available yet. Please try again later.”
+   - Add a reusable unavailable-checkout action, preserving the selected plan and cycle through sign-in and page reload, that shows exactly: “Payment checkout is not available yet. Please try again later.”
    - Wire every plan selection and upgrade action to that honest message; no plan status, transaction, or credit data will be changed.
 
 3. **Subscription status cleanup**
@@ -23,13 +23,13 @@ Rebrand the existing application to **DMRJ Scheduling**, correct pricing and sub
 
 4. **Authentication hardening**
    - Keep email/password only.
-   - Add normalized input validation, clearer pending/error states, safe session restoration, cache clearing between users, reliable post-login redirects, and mobile-friendly form behavior.
-   - Verify sign-up, sign-out, sign-in-after-sign-out, persistence after reload, and protected-page redirect behavior.
+   - Add normalized input validation, password confirmation, clearer pending/error states, safe session restoration, cache clearing between users, reliable post-login redirects, and mobile-friendly form behavior. Inspect existing password recovery and preserve it if present.
+   - Verify sign-up, sign-out, sign-in-after-sign-out, persistence after reload, and protected-page redirect behavior; avoid changing auth settings silently.
 
 5. **Security audit and verification**
-   - Review all row-level access rules for business-scoped tables and close any cross-tenant read/write gaps with additive migrations.
+   - Review all row-level access rules for business-scoped tables, including customer and staff privacy, and close cross-tenant read/write gaps with additive migrations.
    - Confirm only the publishable browser credential is client-visible and no private credentials are present in application source.
-   - Run the project security scanner, focused TypeScript check, lint/build diagnostics, and responsive browser checks for public, auth, pricing, dashboard, billing, and upgrade flows.
+   - Run the project security scanner, focused TypeScript check, lint/build diagnostics, and responsive browser checks for public, auth, pricing, dashboard, calendar, appointments, customers, staff, services, availability, billing, and upgrade flows. Do not publish automatically.
 
 ## Acceptance checks
 - No visible old brand, `trialing`, or “2 months free” copy remains.

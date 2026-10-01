@@ -12,10 +12,13 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Sign in — Cadence" },
-      { name: "description", content: "Sign in to your Cadence scheduling workspace." },
-      { property: "og:title", content: "Sign in — Cadence" },
-      { property: "og:description", content: "Sign in to your Cadence scheduling workspace." },
+      { title: "Sign in — DMRJ Scheduling" },
+      { name: "description", content: "Sign in to your DMRJ Scheduling workspace." },
+      { property: "og:title", content: "Sign in — DMRJ Scheduling" },
+      {
+        property: "og:description",
+        content: "Sign in to your DMRJ Scheduling workspace.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -40,6 +43,7 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  const [confirmation, setConfirmation] = useState("");
   const [busy, setBusy] = useState(false);
   const [tab, setTab] = useState("signin");
 
@@ -48,79 +52,92 @@ function AuthPage() {
   useEffect(() => {
     let active = true;
 
-    supabase.auth.getSession().then(({ data }) => {
-      if (active && data.session) navigate({ to: "/dashboard", replace: true });
-    });
-
-    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
-      if (!active) return;
-      if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session) {
-        navigate({ to: "/dashboard", replace: true });
-      }
-    });
+    supabase.auth
+      .getUser()
+      .then(({ data }) => {
+        if (active && data.user) navigate({ to: "/dashboard", replace: true });
+      })
+      .catch(() => {
+        /* Keep the sign-in form available on connection errors. */
+      });
 
     return () => {
       active = false;
-      sub.subscription.unsubscribe();
     };
   }, [navigate]);
 
   async function signIn(e: React.FormEvent) {
     e.preventDefault();
+    if (!email.trim() || !password) {
+      toast.error("Enter your email and password.");
+      return;
+    }
     setBusy(true);
     // Clear anything cached from a previous account before the new session lands.
     queryClient.clear();
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password,
-    });
-    setBusy(false);
-    if (error) {
-      toast.error(friendlyError(error.message));
-      return;
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim().toLowerCase(),
+        password,
+      });
+      if (error) {
+        toast.error(friendlyError(error.message));
+        return;
+      }
+      if (!data.session) {
+        toast.error("Sign-in didn't complete. Please try again.");
+        return;
+      }
+      navigate({ to: "/dashboard", replace: true });
+    } catch {
+      toast.error("Couldn't sign in. Check your connection and try again.");
+    } finally {
+      setBusy(false);
     }
-    if (!data.session) {
-      toast.error("Sign-in didn't complete. Please try again.");
-      return;
-    }
-    await queryClient.invalidateQueries();
-    navigate({ to: "/dashboard", replace: true });
   }
 
   async function signUp(e: React.FormEvent) {
     e.preventDefault();
+    if (password.length < 6) {
+      toast.error("Password must be at least 6 characters.");
+      return;
+    }
+    if (password !== confirmation) {
+      toast.error("Passwords do not match.");
+      return;
+    }
     setBusy(true);
     queryClient.clear();
-    const { data, error } = await supabase.auth.signUp({
-      email: email.trim(),
-      password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/dashboard`,
-        data: { full_name: fullName },
-      },
-    });
-    setBusy(false);
-    if (error) {
-      toast.error(friendlyError(error.message));
-      return;
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: email.trim().toLowerCase(),
+        password,
+        options: { emailRedirectTo: window.location.origin, data: { full_name: fullName.trim() } },
+      });
+      if (error) {
+        toast.error(friendlyError(error.message));
+        return;
+      }
+      if (data.session) {
+        toast.success("Account created — you have 2 complimentary credits.");
+        navigate({ to: "/dashboard", replace: true });
+        return;
+      }
+      toast.success("Check your email to confirm your account, then sign in.");
+      setTab("signin");
+      setPassword("");
+      setConfirmation("");
+    } catch {
+      toast.error("Couldn't create your account. Check your connection and try again.");
+    } finally {
+      setBusy(false);
     }
-
-    if (data.session) {
-      toast.success("Account created — you have 2 complimentary credits.");
-      await queryClient.invalidateQueries();
-      navigate({ to: "/dashboard", replace: true });
-      return;
-    }
-
-    toast.success("Check your email to confirm your account, then sign in.");
-    setTab("signin");
-    setPassword("");
   }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-secondary/40 px-5 py-12">
       <div className="surface w-full max-w-md p-7">
-        <h1 className="font-display text-2xl font-semibold text-primary">Cadence</h1>
+        <h1 className="font-display text-2xl font-semibold text-primary">DMRJ Scheduling</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Sign in to manage your diary, team and customers.
         </p>
@@ -188,6 +205,18 @@ function AuthPage() {
                   minLength={6}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirm-password">Confirm password</Label>
+                <Input
+                  id="confirm-password"
+                  type="password"
+                  autoComplete="new-password"
+                  required
+                  minLength={6}
+                  value={confirmation}
+                  onChange={(e) => setConfirmation(e.target.value)}
                 />
               </div>
               <Button className="w-full" disabled={busy}>

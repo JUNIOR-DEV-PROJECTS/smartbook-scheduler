@@ -123,9 +123,7 @@ export function AppShell({
       <div className="flex min-h-screen items-center justify-center p-6 text-center">
         <div>
           <h1 className="text-lg font-semibold">We couldn't load your workspace</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Check your connection and try again.
-          </p>
+          <p className="mt-2 text-sm text-muted-foreground">Check your connection and try again.</p>
           <Button className="mt-4" onClick={() => queryClient.invalidateQueries()}>
             Retry
           </Button>
@@ -140,8 +138,8 @@ export function AppShell({
         <div className="surface max-w-md p-8">
           <h1 className="text-lg font-semibold">No business yet</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Set up your business to open the dashboard. If you were invited to a team, ask the
-            owner to add you again.
+            Set up your business to open the dashboard. If you were invited to a team, ask the owner
+            to add you again.
           </p>
           <div className="mt-5 flex justify-center gap-2">
             <Button asChild>
@@ -162,7 +160,7 @@ export function AppShell({
     <div className="flex h-full flex-col">
       <div className="px-3 py-5">
         <Link to="/dashboard" className="font-display text-lg font-semibold text-primary">
-          Cadence
+          DMRJ Scheduling
         </Link>
         <p className="mt-1 truncate text-xs text-muted-foreground">{business.name}</p>
       </div>

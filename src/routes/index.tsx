@@ -7,17 +7,18 @@ import { PLAN_LIST } from "@/lib/plans";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Cadence — Smart Scheduling for Modern Businesses" },
+      { title: "DMRJ Scheduling — Smart scheduling for modern businesses." },
       {
         name: "description",
-        content:
-          "Cadence gives salons, clinics, spas and practices a booking page, a shared calendar and customer records in one calm workspace.",
+        content: "Appointment scheduling software for salons, clinics, spas and practices.",
       },
-      { property: "og:title", content: "Cadence — Smart Scheduling for Modern Businesses" },
+      {
+        property: "og:title",
+        content: "DMRJ Scheduling — Smart scheduling for modern businesses.",
+      },
       {
         property: "og:description",
-        content:
-          "A booking page, a shared team calendar and customer records in one calm workspace.",
+        content: "Appointment scheduling software for salons, clinics, spas and practices.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -53,7 +54,7 @@ function Landing() {
   return (
     <div className="min-h-screen bg-background">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-5 py-6">
-        <span className="font-display text-xl font-semibold text-primary">Cadence</span>
+        <span className="font-display text-xl font-semibold text-primary">DMRJ Scheduling</span>
         <nav className="flex items-center gap-2">
           <Button asChild variant="ghost" size="sm">
             <Link to="/auth">Sign in</Link>
@@ -73,12 +74,11 @@ function Landing() {
             Smart scheduling for modern businesses.
           </h1>
           <p className="mt-5 max-w-xl text-lg text-muted-foreground">
-            Cadence runs the diary for salons, clinics, spas and practices — online booking, a
-            shared team calendar and customer records that stay in step.
+            Appointment scheduling software for salons, clinics, spas and practices.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Button asChild size="lg">
-              <Link to="/auth">Get started free</Link>
+              <Link to="/auth">Get started</Link>
             </Button>
             <Button asChild size="lg" variant="outline">
               <Link to="/pricing">See pricing</Link>
@@ -117,11 +117,14 @@ function Landing() {
               </div>
             ))}
           </div>
+          <p className="mt-6 text-sm text-muted-foreground">
+            Payment checkout is not available yet.
+          </p>
         </section>
       </main>
 
       <footer className="border-t border-border py-8 text-center text-sm text-muted-foreground">
-        © {new Date().getFullYear()} Cadence
+        © {new Date().getFullYear()} DMRJ Scheduling
       </footer>
     </div>
   );

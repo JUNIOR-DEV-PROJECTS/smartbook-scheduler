@@ -1,21 +1,21 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+
 import { Check } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { PLAN_LIST, annualPrice } from "@/lib/plans";
-import { cn } from "@/lib/utils";
+import { PLAN_LIST } from "@/lib/plans";
+import { selectPlan } from "@/lib/checkout";
 
 export const Route = createFileRoute("/pricing")({
   head: () => ({
     meta: [
-      { title: "Pricing — Cadence scheduling plans" },
+      { title: "Pricing — DMRJ Scheduling" },
       {
         name: "description",
         content:
-          "Cadence plans: Starter $19, Professional $39 and Business $79 a month, billed monthly or annually. New accounts get 2 complimentary credits.",
+          "Appointment scheduling software for salons, clinics, spas and practices. Starter $19, Professional $39 and Business $79 per month.",
       },
-      { property: "og:title", content: "Pricing — Cadence scheduling plans" },
+      { property: "og:title", content: "Pricing — DMRJ Scheduling" },
       {
         property: "og:description",
         content:
@@ -29,13 +29,11 @@ export const Route = createFileRoute("/pricing")({
 });
 
 function Pricing() {
-  const [cycle, setCycle] = useState<"monthly" | "annual">("monthly");
-
   return (
     <div className="min-h-screen bg-background">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-5 py-6">
         <Link to="/" className="font-display text-xl font-semibold text-primary">
-          Cadence
+          DMRJ Scheduling
         </Link>
         <Button asChild size="sm">
           <Link to="/auth">Get started</Link>
@@ -44,24 +42,15 @@ function Pricing() {
       <main className="mx-auto max-w-6xl px-5 pb-20">
         <h1 className="text-4xl font-semibold">Pricing</h1>
         <p className="mt-3 max-w-lg text-muted-foreground">
-          Every new account starts with 2 complimentary credits. After that, pick the plan that
-          fits your team.
+          Every new account starts with 2 complimentary credits. After that, pick the plan that fits
+          your team.
         </p>
 
-        <div className="mt-8 inline-flex rounded-lg border border-border p-1">
-          {(["monthly", "annual"] as const).map((c) => (
-            <button
-              key={c}
-              type="button"
-              onClick={() => setCycle(c)}
-              className={cn(
-                "rounded-md px-4 py-1.5 text-sm transition-colors",
-                cycle === c ? "bg-primary text-primary-foreground" : "text-muted-foreground",
-              )}
-            >
-              {c === "annual" ? "Annual · 2 months free" : "Monthly"}
-            </button>
-          ))}
+        <div className="mt-8 flex flex-wrap items-center gap-3 text-sm">
+          <span className="rounded-md bg-primary px-4 py-2 text-primary-foreground">Monthly</span>
+          <span className="text-muted-foreground" aria-disabled="true">
+            Annual — Annual billing is coming soon.
+          </span>
         </div>
 
         <div className="mt-8 grid gap-6 md:grid-cols-3">
@@ -70,10 +59,8 @@ function Pricing() {
               <h2 className="text-lg font-semibold">{plan.name}</h2>
               <p className="mt-1 text-sm text-muted-foreground">{plan.tagline}</p>
               <p className="mt-5 text-4xl font-semibold">
-                ${cycle === "monthly" ? plan.price : annualPrice(plan)}
-                <span className="text-base font-normal text-muted-foreground">
-                  {cycle === "monthly" ? "/mo" : "/yr"}
-                </span>
+                ${plan.price}
+                <span className="text-base font-normal text-muted-foreground">/mo</span>
               </p>
               <ul className="mt-5 flex-1 space-y-2.5 text-sm">
                 {plan.features.map((f) => (
@@ -83,12 +70,17 @@ function Pricing() {
                   </li>
                 ))}
               </ul>
-              <Button asChild className="mt-6" variant={plan.id === "pro" ? "default" : "outline"}>
-                <Link to="/auth">Get started</Link>
+              <Button
+                className="mt-6"
+                variant={plan.id === "pro" ? "default" : "outline"}
+                onClick={() => selectPlan(plan.id, "monthly")}
+              >
+                Choose {plan.name}
               </Button>
             </div>
           ))}
         </div>
+        <p className="mt-6 text-sm text-muted-foreground">Payment checkout is not available yet.</p>
       </main>
     </div>
   );
