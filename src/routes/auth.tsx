@@ -13,11 +13,11 @@ export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
       { title: "Sign in — DMRJ Scheduling" },
-      { name: "description", content: "Sign in to your DMRJ Scheduling scheduling workspace." },
+      { name: "description", content: "Sign in to your DMRJ Scheduling workspace." },
       { property: "og:title", content: "Sign in — DMRJ Scheduling" },
       {
         property: "og:description",
-        content: "Sign in to your DMRJ Scheduling scheduling workspace.",
+        content: "Sign in to your DMRJ Scheduling workspace.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
