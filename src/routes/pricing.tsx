@@ -9,13 +9,13 @@ import { selectPlan } from "@/lib/checkout";
 export const Route = createFileRoute("/pricing")({
   head: () => ({
     meta: [
-      { title: "Pricing — DMRJ Scheduling scheduling plans" },
+      { title: "Pricing — DMRJ Scheduling" },
       {
         name: "description",
         content:
           "Appointment scheduling software for salons, clinics, spas and practices. Starter $19, Professional $39 and Business $79 per month.",
       },
-      { property: "og:title", content: "Pricing — DMRJ Scheduling scheduling plans" },
+      { property: "og:title", content: "Pricing — DMRJ Scheduling" },
       {
         property: "og:description",
         content:

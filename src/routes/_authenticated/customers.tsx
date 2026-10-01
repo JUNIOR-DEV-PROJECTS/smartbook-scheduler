@@ -10,6 +10,14 @@ import { Badge } from "@/components/ui/badge";
 import { useCustomers, useWorkspace } from "@/hooks/useWorkspace";
 
 export const Route = createFileRoute("/_authenticated/customers")({
+  head: () => ({ meta: [
+    { title: "Customers — DMRJ Scheduling" },
+    { name: "description", content: "Customers in DMRJ Scheduling. Appointment scheduling software for salons, clinics, spas and practices." },
+    { property: "og:title", content: "Customers — DMRJ Scheduling" },
+    { property: "og:description", content: "Appointment scheduling software for salons, clinics, spas and practices." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: CustomersPage,
 });
 

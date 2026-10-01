@@ -21,6 +21,14 @@ import { toDateISO } from "@/lib/scheduling";
 import { WEEKDAYS_SHORT } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/calendar")({
+  head: () => ({ meta: [
+    { title: "Calendar — DMRJ Scheduling" },
+    { name: "description", content: "Calendar in DMRJ Scheduling. Appointment scheduling software for salons, clinics, spas and practices." },
+    { property: "og:title", content: "Calendar — DMRJ Scheduling" },
+    { property: "og:description", content: "Appointment scheduling software for salons, clinics, spas and practices." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: CalendarPage,
 });
 

@@ -4,6 +4,14 @@ import { AppShell, RequireManager } from "@/components/app-shell";
 import { useWorkspace } from "@/hooks/useWorkspace";
 
 export const Route = createFileRoute("/_authenticated/locations")({
+  head: () => ({ meta: [
+    { title: "Locations — DMRJ Scheduling" },
+    { name: "description", content: "Locations in DMRJ Scheduling. Appointment scheduling software for salons, clinics, spas and practices." },
+    { property: "og:title", content: "Locations — DMRJ Scheduling" },
+    { property: "og:description", content: "Appointment scheduling software for salons, clinics, spas and practices." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: LocationsPage,
 });
 
