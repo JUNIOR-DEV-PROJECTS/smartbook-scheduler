@@ -162,7 +162,7 @@ export function AppShell({
     <div className="flex h-full flex-col">
       <div className="px-3 py-5">
         <Link to="/dashboard" className="font-display text-lg font-semibold text-primary">
-          Cadence
+          DMRJ Scheduling
         </Link>
         <p className="mt-1 truncate text-xs text-muted-foreground">{business.name}</p>
       </div>

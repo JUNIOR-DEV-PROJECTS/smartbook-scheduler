@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Check } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -9,8 +8,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { PLAN_LIST, annualPrice } from "@/lib/plans";
-import { cn } from "@/lib/utils";
+import { PLAN_LIST } from "@/lib/plans";
+import { selectPlan } from "@/lib/checkout";
 
 /** Shown when the complimentary credits run out. */
 export function UpgradeDialog({
@@ -20,8 +19,6 @@ export function UpgradeDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const [cycle, setCycle] = useState<"monthly" | "annual">("monthly");
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
@@ -32,22 +29,9 @@ export function UpgradeDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex justify-center">
-          <div className="inline-flex rounded-lg border border-border p-1">
-            {(["monthly", "annual"] as const).map((c) => (
-              <button
-                key={c}
-                type="button"
-                onClick={() => setCycle(c)}
-                className={cn(
-                  "rounded-md px-3 py-1.5 text-sm capitalize transition-colors",
-                  cycle === c ? "bg-primary text-primary-foreground" : "text-muted-foreground",
-                )}
-              >
-                {c === "annual" ? "Annual (2 months free)" : "Monthly"}
-              </button>
-            ))}
-          </div>
+        <div className="flex flex-wrap justify-center gap-3 text-sm">
+          <span className="rounded-md bg-primary px-3 py-2 text-primary-foreground">Monthly</span>
+          <span className="text-muted-foreground" aria-disabled="true">Annual — Annual billing is coming soon.</span>
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
@@ -56,10 +40,7 @@ export function UpgradeDialog({
               <h3 className="font-semibold">{plan.name}</h3>
               <p className="mt-1 text-xs text-muted-foreground">{plan.tagline}</p>
               <p className="mt-4 text-3xl font-semibold">
-                ${cycle === "monthly" ? plan.price : annualPrice(plan)}
-                <span className="text-sm font-normal text-muted-foreground">
-                  {cycle === "monthly" ? "/mo" : "/yr"}
-                </span>
+                ${plan.price}<span className="text-sm font-normal text-muted-foreground">/mo</span>
               </p>
               <ul className="mt-4 flex-1 space-y-2 text-sm">
                 {plan.features.map((f) => (
@@ -69,12 +50,13 @@ export function UpgradeDialog({
                   </li>
                 ))}
               </ul>
+              <Button className="mt-5" onClick={() => selectPlan(plan.id, "monthly")}>Choose {plan.name}</Button>
             </div>
           ))}
         </div>
 
         <p className="text-center text-xs text-muted-foreground">
-          Card payments aren't switched on yet — contact us to activate a plan on your account.
+          Payment checkout is not available yet.
         </p>
       </DialogContent>
     </Dialog>
