@@ -13,14 +13,23 @@ import { supabase } from "@/integrations/supabase/client";
 import { useWorkspace } from "@/hooks/useWorkspace";
 
 export const Route = createFileRoute("/_authenticated/settings")({
-  head: () => ({ meta: [
-    { title: "Settings — DMRJ Scheduling" },
-    { name: "description", content: "Settings in DMRJ Scheduling. Appointment scheduling software for salons, clinics, spas and practices." },
-    { property: "og:title", content: "Settings — DMRJ Scheduling" },
-    { property: "og:description", content: "Appointment scheduling software for salons, clinics, spas and practices." },
-    { property: "og:type", content: "website" },
-    { name: "twitter:card", content: "summary" },
-  ] }),
+  head: () => ({
+    meta: [
+      { title: "Settings — DMRJ Scheduling" },
+      {
+        name: "description",
+        content:
+          "Settings in DMRJ Scheduling. Appointment scheduling software for salons, clinics, spas and practices.",
+      },
+      { property: "og:title", content: "Settings — DMRJ Scheduling" },
+      {
+        property: "og:description",
+        content: "Appointment scheduling software for salons, clinics, spas and practices.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
   component: SettingsPage,
 });
 

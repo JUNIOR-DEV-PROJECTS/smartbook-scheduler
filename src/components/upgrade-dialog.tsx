@@ -31,7 +31,9 @@ export function UpgradeDialog({
 
         <div className="flex flex-wrap justify-center gap-3 text-sm">
           <span className="rounded-md bg-primary px-3 py-2 text-primary-foreground">Monthly</span>
-          <span className="text-muted-foreground" aria-disabled="true">Annual — Annual billing is coming soon.</span>
+          <span className="text-muted-foreground" aria-disabled="true">
+            Annual — Annual billing is coming soon.
+          </span>
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
@@ -40,7 +42,8 @@ export function UpgradeDialog({
               <h3 className="font-semibold">{plan.name}</h3>
               <p className="mt-1 text-xs text-muted-foreground">{plan.tagline}</p>
               <p className="mt-4 text-3xl font-semibold">
-                ${plan.price}<span className="text-sm font-normal text-muted-foreground">/mo</span>
+                ${plan.price}
+                <span className="text-sm font-normal text-muted-foreground">/mo</span>
               </p>
               <ul className="mt-4 flex-1 space-y-2 text-sm">
                 {plan.features.map((f) => (
@@ -50,7 +53,9 @@ export function UpgradeDialog({
                   </li>
                 ))}
               </ul>
-              <Button className="mt-5" onClick={() => selectPlan(plan.id, "monthly")}>Choose {plan.name}</Button>
+              <Button className="mt-5" onClick={() => selectPlan(plan.id, "monthly")}>
+                Choose {plan.name}
+              </Button>
             </div>
           ))}
         </div>

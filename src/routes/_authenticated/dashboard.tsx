@@ -145,9 +145,8 @@ function DashboardBody({ onEdit }: { onEdit: (a: AppointmentRow) => void }) {
       .reduce((sum, r) => sum + r.price_cents, 0);
     return {
       today: todays.filter((a) => a.status !== "cancelled").length,
-      upcoming: (upcomingQ.data ?? []).filter((a) =>
-        ["pending", "confirmed"].includes(a.status),
-      ).length,
+      upcoming: (upcomingQ.data ?? []).filter((a) => ["pending", "confirmed"].includes(a.status))
+        .length,
       completed: rows.filter((r) => r.status === "completed").length,
       cancelled: rows.filter((r) => r.status === "cancelled" || r.status === "no_show").length,
       revenue,

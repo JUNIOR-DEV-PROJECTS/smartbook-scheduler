@@ -54,10 +54,22 @@ function BillingPage() {
             <div className="surface p-5">
               <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
                 <div className="min-w-0">
-                  <h2 className="text-lg font-semibold">{paid ? `${plan.name} plan` : "No active subscription"}</h2>
-                  {paid ? <p className="text-sm text-muted-foreground">${plan.price} per month</p> : null}
+                  <h2 className="text-lg font-semibold">
+                    {paid ? `${plan.name} plan` : "No active subscription"}
+                  </h2>
+                  {paid ? (
+                    <p className="text-sm text-muted-foreground">${plan.price} per month</p>
+                  ) : null}
                 </div>
-                <Badge variant="secondary">{paid ? "Active" : business.plan_status === "past_due" ? "Past due" : business.plan_status === "canceled" ? "Canceled" : "Not subscribed"}</Badge>
+                <Badge variant="secondary">
+                  {paid
+                    ? "Active"
+                    : business.plan_status === "past_due"
+                      ? "Past due"
+                      : business.plan_status === "canceled"
+                        ? "Canceled"
+                        : "Not subscribed"}
+                </Badge>
               </div>
               {!paid ? (
                 <p className="mt-3 text-sm text-muted-foreground">
@@ -66,18 +78,20 @@ function BillingPage() {
                 </p>
               ) : null}
 
-              {paid ? <div className="mt-5 space-y-4">
-                <UsageBar
-                  label="Bookings this month"
-                  used={usage.data?.bookings ?? 0}
-                  limit={plan.monthlyBookings}
-                />
-                <UsageBar
-                  label="Active team members"
-                  used={usage.data?.staff ?? 0}
-                  limit={plan.staffSeats}
-                />
-              </div> : null}
+              {paid ? (
+                <div className="mt-5 space-y-4">
+                  <UsageBar
+                    label="Bookings this month"
+                    used={usage.data?.bookings ?? 0}
+                    limit={plan.monthlyBookings}
+                  />
+                  <UsageBar
+                    label="Active team members"
+                    used={usage.data?.staff ?? 0}
+                    limit={plan.staffSeats}
+                  />
+                </div>
+              ) : null}
             </div>
 
             <div className="grid gap-4 md:grid-cols-3">
@@ -99,12 +113,20 @@ function BillingPage() {
                       Current plan
                     </Badge>
                   ) : (
-                    <Button className="mt-4" variant="outline" onClick={() => selectPlan(p.id, "monthly")}>Choose {p.name}</Button>
+                    <Button
+                      className="mt-4"
+                      variant="outline"
+                      onClick={() => selectPlan(p.id, "monthly")}
+                    >
+                      Choose {p.name}
+                    </Button>
                   )}
                 </div>
               ))}
             </div>
-            <p className="text-sm text-muted-foreground">Annual billing is coming soon. Payment checkout is not available yet.</p>
+            <p className="text-sm text-muted-foreground">
+              Annual billing is coming soon. Payment checkout is not available yet.
+            </p>
           </div>
         </RequireManager>
       ) : null}

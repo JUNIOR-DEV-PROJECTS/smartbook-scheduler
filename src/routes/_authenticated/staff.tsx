@@ -7,14 +7,23 @@ import { Badge } from "@/components/ui/badge";
 import { useStaff, useWorkspace } from "@/hooks/useWorkspace";
 
 export const Route = createFileRoute("/_authenticated/staff")({
-  head: () => ({ meta: [
-    { title: "Staff — DMRJ Scheduling" },
-    { name: "description", content: "Staff in DMRJ Scheduling. Appointment scheduling software for salons, clinics, spas and practices." },
-    { property: "og:title", content: "Staff — DMRJ Scheduling" },
-    { property: "og:description", content: "Appointment scheduling software for salons, clinics, spas and practices." },
-    { property: "og:type", content: "website" },
-    { name: "twitter:card", content: "summary" },
-  ] }),
+  head: () => ({
+    meta: [
+      { title: "Staff — DMRJ Scheduling" },
+      {
+        name: "description",
+        content:
+          "Staff in DMRJ Scheduling. Appointment scheduling software for salons, clinics, spas and practices.",
+      },
+      { property: "og:title", content: "Staff — DMRJ Scheduling" },
+      {
+        property: "og:description",
+        content: "Appointment scheduling software for salons, clinics, spas and practices.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
   component: StaffPage,
 });
 

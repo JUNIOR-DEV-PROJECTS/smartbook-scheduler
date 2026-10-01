@@ -82,14 +82,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "DMRJ Scheduling — Smart scheduling for modern businesses." },
       {
         name: "description",
-        content:
-          "Appointment scheduling software for salons, clinics, spas and practices.",
+        content: "Appointment scheduling software for salons, clinics, spas and practices.",
       },
-      { property: "og:title", content: "DMRJ Scheduling — Smart scheduling for modern businesses." },
+      {
+        property: "og:title",
+        content: "DMRJ Scheduling — Smart scheduling for modern businesses.",
+      },
       {
         property: "og:description",
-        content:
-          "Appointment scheduling software for salons, clinics, spas and practices.",
+        content: "Appointment scheduling software for salons, clinics, spas and practices.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

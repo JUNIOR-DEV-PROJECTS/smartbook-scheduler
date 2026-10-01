@@ -18,21 +18,26 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
-import {
-  useWorkspace,
-  type AppointmentRow,
-  type AppointmentStatus,
-} from "@/hooks/useWorkspace";
+import { useWorkspace, type AppointmentRow, type AppointmentStatus } from "@/hooks/useWorkspace";
 
 export const Route = createFileRoute("/_authenticated/appointments")({
-  head: () => ({ meta: [
-    { title: "Appointments — DMRJ Scheduling" },
-    { name: "description", content: "Appointments in DMRJ Scheduling. Appointment scheduling software for salons, clinics, spas and practices." },
-    { property: "og:title", content: "Appointments — DMRJ Scheduling" },
-    { property: "og:description", content: "Appointment scheduling software for salons, clinics, spas and practices." },
-    { property: "og:type", content: "website" },
-    { name: "twitter:card", content: "summary" },
-  ] }),
+  head: () => ({
+    meta: [
+      { title: "Appointments — DMRJ Scheduling" },
+      {
+        name: "description",
+        content:
+          "Appointments in DMRJ Scheduling. Appointment scheduling software for salons, clinics, spas and practices.",
+      },
+      { property: "og:title", content: "Appointments — DMRJ Scheduling" },
+      {
+        property: "og:description",
+        content: "Appointment scheduling software for salons, clinics, spas and practices.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
   component: AppointmentsPage,
 });
 

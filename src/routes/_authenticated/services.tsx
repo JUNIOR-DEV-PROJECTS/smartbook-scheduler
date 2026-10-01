@@ -8,14 +8,23 @@ import { money } from "@/lib/format";
 import { useServices, useWorkspace } from "@/hooks/useWorkspace";
 
 export const Route = createFileRoute("/_authenticated/services")({
-  head: () => ({ meta: [
-    { title: "Services — DMRJ Scheduling" },
-    { name: "description", content: "Services in DMRJ Scheduling. Appointment scheduling software for salons, clinics, spas and practices." },
-    { property: "og:title", content: "Services — DMRJ Scheduling" },
-    { property: "og:description", content: "Appointment scheduling software for salons, clinics, spas and practices." },
-    { property: "og:type", content: "website" },
-    { name: "twitter:card", content: "summary" },
-  ] }),
+  head: () => ({
+    meta: [
+      { title: "Services — DMRJ Scheduling" },
+      {
+        name: "description",
+        content:
+          "Services in DMRJ Scheduling. Appointment scheduling software for salons, clinics, spas and practices.",
+      },
+      { property: "og:title", content: "Services — DMRJ Scheduling" },
+      {
+        property: "og:description",
+        content: "Appointment scheduling software for salons, clinics, spas and practices.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
   component: ServicesPage,
 });
 

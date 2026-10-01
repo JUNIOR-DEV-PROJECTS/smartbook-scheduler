@@ -10,14 +10,15 @@ export const Route = createFileRoute("/")({
       { title: "DMRJ Scheduling — Smart scheduling for modern businesses." },
       {
         name: "description",
-        content:
-          "Appointment scheduling software for salons, clinics, spas and practices.",
+        content: "Appointment scheduling software for salons, clinics, spas and practices.",
       },
-      { property: "og:title", content: "DMRJ Scheduling — Smart scheduling for modern businesses." },
+      {
+        property: "og:title",
+        content: "DMRJ Scheduling — Smart scheduling for modern businesses.",
+      },
       {
         property: "og:description",
-        content:
-          "Appointment scheduling software for salons, clinics, spas and practices.",
+        content: "Appointment scheduling software for salons, clinics, spas and practices.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -116,7 +117,9 @@ function Landing() {
               </div>
             ))}
           </div>
-          <p className="mt-6 text-sm text-muted-foreground">Payment checkout is not available yet.</p>
+          <p className="mt-6 text-sm text-muted-foreground">
+            Payment checkout is not available yet.
+          </p>
         </section>
       </main>
 

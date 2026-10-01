@@ -15,7 +15,10 @@ export const Route = createFileRoute("/auth")({
       { title: "Sign in — DMRJ Scheduling" },
       { name: "description", content: "Sign in to your DMRJ Scheduling scheduling workspace." },
       { property: "og:title", content: "Sign in — DMRJ Scheduling" },
-      { property: "og:description", content: "Sign in to your DMRJ Scheduling scheduling workspace." },
+      {
+        property: "og:description",
+        content: "Sign in to your DMRJ Scheduling scheduling workspace.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -49,23 +52,42 @@ function AuthPage() {
   useEffect(() => {
     let active = true;
 
-    supabase.auth.getUser().then(({ data }) => {
-      if (active && data.user) navigate({ to: "/dashboard", replace: true });
-    }).catch(() => { /* Keep the sign-in form available on connection errors. */ });
+    supabase.auth
+      .getUser()
+      .then(({ data }) => {
+        if (active && data.user) navigate({ to: "/dashboard", replace: true });
+      })
+      .catch(() => {
+        /* Keep the sign-in form available on connection errors. */
+      });
 
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, [navigate]);
 
   async function signIn(e: React.FormEvent) {
     e.preventDefault();
-    if (!email.trim() || !password) { toast.error("Enter your email and password."); return; }
+    if (!email.trim() || !password) {
+      toast.error("Enter your email and password.");
+      return;
+    }
     setBusy(true);
     // Clear anything cached from a previous account before the new session lands.
     queryClient.clear();
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email: email.trim().toLowerCase(), password });
-      if (error) { toast.error(friendlyError(error.message)); return; }
-      if (!data.session) { toast.error("Sign-in didn't complete. Please try again."); return; }
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim().toLowerCase(),
+        password,
+      });
+      if (error) {
+        toast.error(friendlyError(error.message));
+        return;
+      }
+      if (!data.session) {
+        toast.error("Sign-in didn't complete. Please try again.");
+        return;
+      }
       navigate({ to: "/dashboard", replace: true });
     } catch {
       toast.error("Couldn't sign in. Check your connection and try again.");
@@ -76,16 +98,26 @@ function AuthPage() {
 
   async function signUp(e: React.FormEvent) {
     e.preventDefault();
-    if (password.length < 6) { toast.error("Password must be at least 6 characters."); return; }
-    if (password !== confirmation) { toast.error("Passwords do not match."); return; }
+    if (password.length < 6) {
+      toast.error("Password must be at least 6 characters.");
+      return;
+    }
+    if (password !== confirmation) {
+      toast.error("Passwords do not match.");
+      return;
+    }
     setBusy(true);
     queryClient.clear();
     try {
       const { data, error } = await supabase.auth.signUp({
-        email: email.trim().toLowerCase(), password,
+        email: email.trim().toLowerCase(),
+        password,
         options: { emailRedirectTo: window.location.origin, data: { full_name: fullName.trim() } },
       });
-      if (error) { toast.error(friendlyError(error.message)); return; }
+      if (error) {
+        toast.error(friendlyError(error.message));
+        return;
+      }
       if (data.session) {
         toast.success("Account created — you have 2 complimentary credits.");
         navigate({ to: "/dashboard", replace: true });
@@ -177,7 +209,15 @@ function AuthPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="confirm-password">Confirm password</Label>
-                <Input id="confirm-password" type="password" autoComplete="new-password" required minLength={6} value={confirmation} onChange={(e) => setConfirmation(e.target.value)} />
+                <Input
+                  id="confirm-password"
+                  type="password"
+                  autoComplete="new-password"
+                  required
+                  minLength={6}
+                  value={confirmation}
+                  onChange={(e) => setConfirmation(e.target.value)}
+                />
               </div>
               <Button className="w-full" disabled={busy}>
                 {busy ? "Creating…" : "Create account"}
