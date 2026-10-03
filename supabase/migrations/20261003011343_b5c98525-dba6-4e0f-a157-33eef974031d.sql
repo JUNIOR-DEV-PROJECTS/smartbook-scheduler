@@ -1,0 +1,1 @@
+ALTER TABLE public.businesses ALTER COLUMN plan_status SET DEFAULT 'none'::public.plan_status;
