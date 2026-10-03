@@ -638,7 +638,7 @@ export type Database = {
         | "reminder"
         | "reschedule"
         | "cancellation"
-      plan_status: "trialing" | "active" | "past_due" | "canceled"
+      plan_status: "trialing" | "active" | "past_due" | "canceled" | "none"
       plan_tier: "starter" | "pro" | "business"
     }
     CompositeTypes: {
@@ -782,7 +782,7 @@ export const Constants = {
         "reschedule",
         "cancellation",
       ],
-      plan_status: ["trialing", "active", "past_due", "canceled"],
+      plan_status: ["trialing", "active", "past_due", "canceled", "none"],
       plan_tier: ["starter", "pro", "business"],
     },
   },
