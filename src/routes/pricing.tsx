@@ -1,10 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-
+import { useEffect, useState } from "react";
 import { Check } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { PLAN_LIST } from "@/lib/plans";
-import { selectPlan } from "@/lib/checkout";
+import { BillingCycleToggle } from "@/components/billing-cycle-toggle";
+import { PLAN_LIST, type PlanId } from "@/lib/plans";
+import { getSelectedPlan, saveSelection, selectPlan, type BillingCycle } from "@/lib/checkout";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/pricing")({
   head: () => ({
@@ -29,6 +31,22 @@ export const Route = createFileRoute("/pricing")({
 });
 
 function Pricing() {
+  const [cycle, setCycle] = useState<BillingCycle>("monthly");
+  const [chosen, setChosen] = useState<PlanId | null>(null);
+
+  useEffect(() => {
+    const saved = getSelectedPlan();
+    if (saved) {
+      setCycle(saved.cycle);
+      setChosen(saved.plan);
+    }
+  }, []);
+
+  function changeCycle(next: BillingCycle) {
+    setCycle(next);
+    saveSelection(chosen, next);
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-5 py-6">
@@ -46,16 +64,16 @@ function Pricing() {
           your team.
         </p>
 
-        <div className="mt-8 flex flex-wrap items-center gap-3 text-sm">
-          <span className="rounded-md bg-primary px-4 py-2 text-primary-foreground">Monthly</span>
-          <span className="text-muted-foreground" aria-disabled="true">
-            Annual — Annual billing is coming soon.
-          </span>
+        <div className="mt-8">
+          <BillingCycleToggle value={cycle} onChange={changeCycle} />
         </div>
 
         <div className="mt-8 grid gap-6 md:grid-cols-3">
           {PLAN_LIST.map((plan) => (
-            <div key={plan.id} className="surface flex flex-col p-6">
+            <div
+              key={plan.id}
+              className={cn("surface flex flex-col p-6", chosen === plan.id && "ring-2 ring-primary")}
+            >
               <h2 className="text-lg font-semibold">{plan.name}</h2>
               <p className="mt-1 text-sm text-muted-foreground">{plan.tagline}</p>
               <p className="mt-5 text-4xl font-semibold">
@@ -73,9 +91,12 @@ function Pricing() {
               <Button
                 className="mt-6"
                 variant={plan.id === "pro" ? "default" : "outline"}
-                onClick={() => selectPlan(plan.id, "monthly")}
+                onClick={() => {
+                  setChosen(plan.id);
+                  selectPlan(plan.id, cycle);
+                }}
               >
-                Choose {plan.name}
+                {chosen === plan.id ? `${plan.name} selected` : `Choose ${plan.name}`}
               </Button>
             </div>
           ))}
