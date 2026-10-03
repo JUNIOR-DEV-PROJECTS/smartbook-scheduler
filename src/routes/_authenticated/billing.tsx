@@ -70,6 +70,7 @@ function BillingPage() {
                         ? "Canceled"
                         : "Not subscribed"}
                 </Badge>
+                {/* "trialing" / "none" both render as Not subscribed: no real trial exists. */}
               </div>
               {!paid ? (
                 <p className="mt-3 text-sm text-muted-foreground">

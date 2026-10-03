@@ -96,6 +96,29 @@ function AuthPage() {
     }
   }
 
+  async function forgotPassword() {
+    const target = email.trim().toLowerCase();
+    if (!/^\S+@\S+\.\S+$/.test(target)) {
+      toast.error("Enter your email above, then click Forgot password.");
+      return;
+    }
+    setBusy(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(target, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) {
+        toast.error(friendlyError(error.message));
+        return;
+      }
+      toast.success("If that email has an account, a reset link is on its way.");
+    } catch {
+      toast.error("Couldn't send the reset email. Check your connection and try again.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function signUp(e: React.FormEvent) {
     e.preventDefault();
     if (password.length < 6) {
@@ -116,6 +139,11 @@ function AuthPage() {
       });
       if (error) {
         toast.error(friendlyError(error.message));
+        return;
+      }
+      if (data.user && data.user.identities?.length === 0) {
+        toast.error("That email already has an account — sign in instead.");
+        setTab("signin");
         return;
       }
       if (data.session) {
@@ -175,6 +203,14 @@ function AuthPage() {
               <Button className="w-full" disabled={busy}>
                 {busy ? "Signing in…" : "Sign in"}
               </Button>
+              <button
+                type="button"
+                onClick={forgotPassword}
+                disabled={busy}
+                className="block w-full text-center text-sm text-primary underline-offset-4 hover:underline"
+              >
+                Forgot password?
+              </button>
             </form>
           </TabsContent>
 

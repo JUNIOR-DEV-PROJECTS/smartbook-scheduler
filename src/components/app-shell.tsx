@@ -213,7 +213,7 @@ export function AppShell({
               <button
                 type="button"
                 onClick={() => setShowUpgrade(true)}
-                className="hidden sm:inline-flex"
+                className="inline-flex"
               >
                 <Badge variant={credits > 0 ? "secondary" : "destructive"}>
                   {credits > 0 ? `${credits} credits left` : "Out of credits — upgrade"}
