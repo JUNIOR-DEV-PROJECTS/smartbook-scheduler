@@ -26,7 +26,7 @@ export const PLANS: Record<PlanId, Plan> = {
       "Up to 2 staff members",
       "200 bookings per month",
       "Online booking page",
-      "Email confirmations & reminders",
+      "Day, week & month calendar",
       "Customer records",
     ],
   },

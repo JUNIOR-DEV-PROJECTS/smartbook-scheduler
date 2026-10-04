@@ -33,7 +33,12 @@ function friendlyError(message: string) {
   if (m.includes("email not confirmed")) return "Confirm your email address, then sign in.";
   if (m.includes("already registered") || m.includes("already been registered"))
     return "That email already has an account — sign in instead.";
-  if (m.includes("password")) return message;
+  if (m.includes("weak") || m.includes("pwned") || m.includes("easy to guess"))
+    return "Esta senha é muito comum ou já apareceu em vazamentos. Use pelo menos 12 caracteres, misturando palavras, números e símbolos.";
+  if (m.includes("should be at least") || m.includes("at least 6"))
+    return "A senha precisa ter pelo menos 6 caracteres.";
+  if (m.includes("rate limit") || m.includes("too many"))
+    return "Muitas tentativas. Aguarde alguns minutos e tente novamente.";
   return message;
 }
 
@@ -241,7 +246,12 @@ function AuthPage() {
                   minLength={6}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  aria-describedby="password-rules"
                 />
+                <p id="password-rules" className="text-xs text-muted-foreground">
+                  Use pelo menos 12 caracteres, misturando palavras, números e símbolos. Evite senhas
+                  comuns ou já usadas em outros sites.
+                </p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="confirm-password">Confirm password</Label>
