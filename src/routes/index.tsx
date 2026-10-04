@@ -41,12 +41,12 @@ const highlights = [
   {
     icon: Users,
     title: "Customers remembered",
-    body: "Visit history, spend, no-shows, tags and private notes on every client.",
+    body: "Contact details, notes and appointment history for every client.",
   },
   {
     icon: Clock,
     title: "Real availability",
-    body: "Opening hours, staff shifts, breaks and time off feed the booking page.",
+    body: "Opening hours and staff shifts decide which times can be booked.",
   },
 ];
 

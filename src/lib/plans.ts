@@ -26,7 +26,7 @@ export const PLANS: Record<PlanId, Plan> = {
       "Up to 2 staff members",
       "200 bookings per month",
       "Online booking page",
-      "Email confirmations & reminders",
+      "Day, week & month calendar",
       "Customer records",
     ],
   },
@@ -42,9 +42,9 @@ export const PLANS: Record<PlanId, Plan> = {
     features: [
       "Up to 10 staff members",
       "2,000 bookings per month",
-      "SMS reminders",
-      "Staff availability & time off",
-      "Customer notes, tags & history",
+      "Staff availability",
+      "Customer records & notes",
+      "Online booking page",
     ],
   },
   business: {
@@ -59,9 +59,9 @@ export const PLANS: Record<PlanId, Plan> = {
     features: [
       "Unlimited staff members",
       "Unlimited bookings",
-      "Custom branding on your booking page",
-      "Priority support",
-      "Advanced reporting",
+      "Online booking page",
+      "Customer records & notes",
+      "Basic reports",
     ],
   },
 };

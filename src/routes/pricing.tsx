@@ -21,7 +21,7 @@ export const Route = createFileRoute("/pricing")({
       {
         property: "og:description",
         content:
-          "Starter $19, Professional $39 and Business $79 a month. Two complimentary credits on sign-up.",
+          "Starter $19, Professional $39 and Business $79 a month.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -60,8 +60,7 @@ function Pricing() {
       <main className="mx-auto max-w-6xl px-5 pb-20">
         <h1 className="text-4xl font-semibold">Pricing</h1>
         <p className="mt-3 max-w-lg text-muted-foreground">
-          Every new account starts with 2 complimentary credits. After that, pick the plan that fits
-          your team.
+          Pick the plan that fits your team.
         </p>
 
         <div className="mt-8">
