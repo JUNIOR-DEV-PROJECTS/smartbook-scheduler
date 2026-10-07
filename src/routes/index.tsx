@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { CalendarCheck, Clock, Users, ShieldCheck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { selectPlan } from "@/lib/checkout";
 import { PLAN_LIST } from "@/lib/plans";
 
 export const Route = createFileRoute("/")({
@@ -109,11 +110,18 @@ function Landing() {
                   ${plan.price}
                   <span className="text-base font-normal text-muted-foreground">/mo</span>
                 </p>
-                <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
+                <ul className="mt-4 flex-1 space-y-2 text-sm text-muted-foreground">
                   {plan.features.map((f) => (
                     <li key={f}>{f}</li>
                   ))}
                 </ul>
+                <Button
+                  className="mt-6"
+                  variant={plan.id === "pro" ? "default" : "outline"}
+                  onClick={() => selectPlan(plan.id, "monthly")}
+                >
+                  Get started
+                </Button>
               </div>
             ))}
           </div>

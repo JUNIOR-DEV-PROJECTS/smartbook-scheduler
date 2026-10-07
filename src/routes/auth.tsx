@@ -6,8 +6,21 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/password-input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
+import { slugify } from "@/lib/format";
+
+const AUTH_TIMEOUT_MS = 15_000;
+
+function withTimeout<T>(promise: PromiseLike<T>): Promise<T> {
+  return Promise.race([
+    Promise.resolve(promise),
+    new Promise<T>((_, reject) =>
+      window.setTimeout(() => reject(new Error("timeout")), AUTH_TIMEOUT_MS),
+    ),
+  ]);
+}
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -29,14 +42,16 @@ export const Route = createFileRoute("/auth")({
 
 function friendlyError(message: string) {
   const m = message.toLowerCase();
-  if (m.includes("invalid login credentials")) return "That email and password don't match.";
+  if (m.includes("invalid login credentials")) return "Incorrect email or password.";
   if (m.includes("email not confirmed")) return "Confirm your email address, then sign in.";
   if (m.includes("already registered") || m.includes("already been registered"))
     return "That email already has an account — sign in instead.";
   if (m.includes("weak") || m.includes("pwned") || m.includes("easy to guess"))
-    return "Esta senha é muito comum ou já apareceu em vazamentos. Use pelo menos 12 caracteres, misturando palavras, números e símbolos.";
-  if (m.includes("should be at least") || m.includes("at least 6"))
-    return "A senha precisa ter pelo menos 6 caracteres.";
+    return "This password is too common or has appeared in data leaks. Use at least 12 characters, mixing words, numbers and symbols.";
+  if (m.includes("should be at least") || m.includes("at least 12"))
+    return "Password must be at least 12 characters.";
+  if (m.includes("duplicate") && m.includes("slug")) return "That business URL is already in use.";
+  if (m === "timeout") return "The request took too long. Please try again.";
   if (m.includes("rate limit") || m.includes("too many"))
     return "Muitas tentativas. Aguarde alguns minutos e tente novamente.";
   return message;
@@ -48,6 +63,8 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  const [businessName, setBusinessName] = useState("");
+  const [businessSlug, setBusinessSlug] = useState("");
   const [confirmation, setConfirmation] = useState("");
   const [busy, setBusy] = useState(false);
   const [tab, setTab] = useState("signin");
@@ -81,10 +98,10 @@ function AuthPage() {
     // Clear anything cached from a previous account before the new session lands.
     queryClient.clear();
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await withTimeout(supabase.auth.signInWithPassword({
         email: email.trim().toLowerCase(),
         password,
-      });
+      }));
       if (error) {
         toast.error(friendlyError(error.message));
         return;
@@ -94,8 +111,8 @@ function AuthPage() {
         return;
       }
       navigate({ to: "/dashboard", replace: true });
-    } catch {
-      toast.error("Couldn't sign in. Check your connection and try again.");
+    } catch (error) {
+      toast.error(friendlyError(error instanceof Error ? error.message : "network"));
     } finally {
       setBusy(false);
     }
@@ -109,16 +126,16 @@ function AuthPage() {
     }
     setBusy(true);
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(target, {
+      const { error } = await withTimeout(supabase.auth.resetPasswordForEmail(target, {
         redirectTo: `${window.location.origin}/reset-password`,
-      });
+      }));
       if (error) {
         toast.error(friendlyError(error.message));
         return;
       }
       toast.success("If that email has an account, a reset link is on its way.");
-    } catch {
-      toast.error("Couldn't send the reset email. Check your connection and try again.");
+    } catch (error) {
+      toast.error(friendlyError(error instanceof Error ? error.message : "network"));
     } finally {
       setBusy(false);
     }
@@ -126,32 +143,75 @@ function AuthPage() {
 
   async function signUp(e: React.FormEvent) {
     e.preventDefault();
-    if (password.length < 6) {
-      toast.error("Password must be at least 6 characters.");
+    const normalizedSlug = slugify(businessSlug || businessName);
+    if (!/^\S+@\S+\.\S+$/.test(email.trim())) {
+      toast.error("Enter a valid email address.");
+      return;
+    }
+    if (password.length < 12) {
+      toast.error("Password must be at least 12 characters.");
       return;
     }
     if (password !== confirmation) {
       toast.error("Passwords do not match.");
       return;
     }
+    if (businessName.trim().length < 2 || businessName.trim().length > 120) {
+      toast.error("Business name must be between 2 and 120 characters.");
+      return;
+    }
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(normalizedSlug) || normalizedSlug.length < 3 || normalizedSlug.length > 60) {
+      toast.error("Business URL must be 3–60 lowercase letters, numbers or hyphens.");
+      return;
+    }
     setBusy(true);
     queryClient.clear();
     try {
-      const { data, error } = await supabase.auth.signUp({
+      const { data, error } = await withTimeout(supabase.auth.signUp({
         email: email.trim().toLowerCase(),
         password,
-        options: { emailRedirectTo: window.location.origin, data: { full_name: fullName.trim() } },
-      });
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth`,
+          data: {
+            full_name: fullName.trim(),
+            pending_business_name: businessName.trim(),
+            pending_business_slug: normalizedSlug,
+          },
+        },
+      }));
       if (error) {
         toast.error(friendlyError(error.message));
         return;
       }
       if (data.user && data.user.identities?.length === 0) {
-        toast.error("That email already has an account — sign in instead.");
+        toast.error("This email is already registered. Try signing in or reset your password.");
         setTab("signin");
         return;
       }
       if (data.session) {
+        const { data: business, error: businessError } = await supabase
+          .from("businesses")
+          .insert({
+            owner_id: data.user.id,
+            name: businessName.trim(),
+            slug: normalizedSlug,
+            onboarding_completed: true,
+          })
+          .select("id")
+          .single();
+        if (businessError) {
+          toast.error(friendlyError(businessError.message));
+          return;
+        }
+        const { error: memberError } = await supabase.from("business_members").insert({
+          business_id: business.id,
+          user_id: data.user.id,
+          role: "owner",
+        });
+        if (memberError) {
+          toast.error("Your account was created, but the workspace could not be opened. Please try again.");
+          return;
+        }
         toast.success("Account created — you have 2 complimentary credits.");
         navigate({ to: "/dashboard", replace: true });
         return;
@@ -160,8 +220,8 @@ function AuthPage() {
       setTab("signin");
       setPassword("");
       setConfirmation("");
-    } catch {
-      toast.error("Couldn't create your account. Check your connection and try again.");
+    } catch (error) {
+      toast.error(friendlyError(error instanceof Error ? error.message : "network"));
     } finally {
       setBusy(false);
     }
@@ -185,7 +245,7 @@ function AuthPage() {
             <form className="space-y-4" onSubmit={signIn}>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input
+                <PasswordInput
                   id="email"
                   type="email"
                   autoComplete="email"
@@ -198,7 +258,6 @@ function AuthPage() {
                 <Label htmlFor="password">Password</Label>
                 <Input
                   id="password"
-                  type="password"
                   autoComplete="current-password"
                   required
                   value={password}
@@ -223,11 +282,37 @@ function AuthPage() {
             <form className="space-y-4" onSubmit={signUp}>
               <div className="space-y-2">
                 <Label htmlFor="name">Your name</Label>
-                <Input id="name" value={fullName} onChange={(e) => setFullName(e.target.value)} />
+                <Input id="name" required value={fullName} onChange={(e) => setFullName(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="business-name">Business name</Label>
+                <Input
+                  id="business-name"
+                  required
+                  minLength={2}
+                  maxLength={120}
+                  value={businessName}
+                  onChange={(e) => {
+                    setBusinessName(e.target.value);
+                    setBusinessSlug(slugify(e.target.value).slice(0, 60));
+                  }}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="business-slug">Business URL</Label>
+                <Input
+                  id="business-slug"
+                  required
+                  minLength={3}
+                  maxLength={60}
+                  pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
+                  value={businessSlug}
+                  onChange={(e) => setBusinessSlug(slugify(e.target.value).slice(0, 60))}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email2">Email</Label>
-                <Input
+                <PasswordInput
                   id="email2"
                   type="email"
                   autoComplete="email"
@@ -240,27 +325,24 @@ function AuthPage() {
                 <Label htmlFor="password2">Password</Label>
                 <Input
                   id="password2"
-                  type="password"
                   autoComplete="new-password"
                   required
-                  minLength={6}
+                  minLength={12}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   aria-describedby="password-rules"
                 />
                 <p id="password-rules" className="text-xs text-muted-foreground">
-                  Use pelo menos 12 caracteres, misturando palavras, números e símbolos. Evite senhas
-                  comuns ou já usadas em outros sites.
+                  Use at least 12 characters, mixing words, numbers and symbols. Avoid common or reused passwords.
                 </p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="confirm-password">Confirm password</Label>
-                <Input
+                <PasswordInput
                   id="confirm-password"
-                  type="password"
                   autoComplete="new-password"
                   required
-                  minLength={6}
+                  minLength={12}
                   value={confirmation}
                   onChange={(e) => setConfirmation(e.target.value)}
                 />
