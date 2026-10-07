@@ -11,3 +11,4 @@
 
 - Keep unavailable checkout choices in a client-side selection helper and never update plan status from pricing UI, because payment has no verified provider yet.
 - Keep each content route responsible for its own metadata so public and private pages have distinct titles.
+- Treat `subscriptions` as the only billing status source; pricing controls only remember a future checkout choice because no provider is connected.

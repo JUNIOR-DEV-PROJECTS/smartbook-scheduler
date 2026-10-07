@@ -33,8 +33,6 @@ import {
   type AppointmentRow,
   type Business,
 } from "@/hooks/useWorkspace";
-import { consumeCredit, isPaidPlan, useCredits, NoCreditsError } from "@/hooks/useCredits";
-import { UpgradeDialog } from "@/components/upgrade-dialog";
 
 interface Props {
   business: Business;
@@ -67,12 +65,6 @@ export function AppointmentDialog({
   const [phone, setPhone] = useState("");
   const [notes, setNotes] = useState("");
   const [busy, setBusy] = useState(false);
-  const [showUpgrade, setShowUpgrade] = useState(false);
-
-  const { data: credits } = useCredits();
-  const paid = isPaidPlan(business.plan_status);
-  /** New bookings cost one complimentary credit unless the business is on a paid plan. */
-  const outOfCredits = !paid && !appointment && (credits ?? 0) <= 0;
 
   const { data: services, isLoading: loadingServices } = useServices(business.id);
   const { data: staffList, isLoading: loadingStaff } = useStaff(business.id);
@@ -193,10 +185,6 @@ export function AppointmentDialog({
       toast.error("Pick a service, a team member and an available time.");
       return;
     }
-    if (outOfCredits) {
-      setShowUpgrade(true);
-      return;
-    }
     setBusy(true);
     try {
       let finalCustomerId: string | null =
@@ -240,28 +228,12 @@ export function AppointmentDialog({
         throw error;
       }
 
-      let left: number | null = null;
-      if (!appointment && !paid) {
-        left = await consumeCredit();
-        await queryClient.invalidateQueries({ queryKey: ["credits"] });
-      }
-
       await queryClient.invalidateQueries({ queryKey: ["appointments"] });
       await queryClient.invalidateQueries({ queryKey: ["customers"] });
-      toast.success(
-        appointment
-          ? "Appointment updated."
-          : left === null
-            ? "Appointment booked."
-            : `Appointment booked. ${left} complimentary ${left === 1 ? "credit" : "credits"} left.`,
-      );
+      toast.success(appointment ? "Appointment updated." : "Appointment booked.");
       onOpenChange(false);
     } catch (err) {
-      if (err instanceof NoCreditsError) {
-        setShowUpgrade(true);
-      } else {
-        toast.error(err instanceof Error ? err.message : "Could not save the appointment");
-      }
+      toast.error(err instanceof Error ? err.message : "Could not save the appointment");
     } finally {
       setBusy(false);
     }
@@ -270,7 +242,6 @@ export function AppointmentDialog({
   const loading = loadingServices || loadingStaff;
 
   return (
-    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
@@ -279,23 +250,6 @@ export function AppointmentDialog({
             Times shown in {tz}. Only genuinely free slots can be picked.
           </DialogDescription>
         </DialogHeader>
-
-        {outOfCredits ? (
-          <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-4 text-sm">
-            <p className="font-medium">You've used both complimentary credits</p>
-            <p className="mt-1 text-muted-foreground">
-              Choose a plan to keep booking appointments.
-            </p>
-            <Button className="mt-3" size="sm" onClick={() => setShowUpgrade(true)}>
-              See plans
-            </Button>
-          </div>
-        ) : !paid && !appointment && credits !== null && credits !== undefined ? (
-          <p className="text-xs text-muted-foreground">
-            {credits} complimentary {credits === 1 ? "credit" : "credits"} left — this booking uses
-            one.
-          </p>
-        ) : null}
 
         {loading ? (
           <div className="space-y-3">
@@ -470,7 +424,5 @@ export function AppointmentDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-    <UpgradeDialog open={showUpgrade} onOpenChange={setShowUpgrade} />
-    </>
   );
 }

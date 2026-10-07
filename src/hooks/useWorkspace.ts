@@ -17,6 +17,22 @@ export interface Workspace {
   userId: string;
 }
 
+export function useSubscription(businessId?: string) {
+  return useQuery({
+    queryKey: ["subscription", businessId],
+    enabled: !!businessId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("subscriptions")
+        .select("plan, billing_interval, status, current_period_end")
+        .eq("business_id", businessId ?? "")
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
 /** Current signed-in user's business + role. Null when they belong to none. */
 export function useWorkspace() {
   return useQuery({

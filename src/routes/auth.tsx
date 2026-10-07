@@ -22,6 +22,39 @@ function withTimeout<T>(promise: PromiseLike<T>): Promise<T> {
   ]);
 }
 
+async function ensureWorkspace(user: { id: string; user_metadata: Record<string, unknown> }) {
+  const { data: existing, error: membershipError } = await supabase
+    .from("business_members")
+    .select("business_id")
+    .eq("user_id", user.id)
+    .limit(1)
+    .maybeSingle();
+  if (membershipError) throw membershipError;
+  if (existing) return;
+
+  const name = typeof user.user_metadata["pending_business_name"] === "string"
+    ? user.user_metadata["pending_business_name"].trim()
+    : "";
+  const slug = typeof user.user_metadata["pending_business_slug"] === "string"
+    ? slugify(user.user_metadata["pending_business_slug"])
+    : "";
+  if (!name || !slug) return;
+
+  const { data: business, error: businessError } = await supabase
+    .from("businesses")
+    .insert({ owner_id: user.id, name, slug, onboarding_completed: true })
+    .select("id")
+    .single();
+  if (businessError) throw businessError;
+
+  const { error: memberError } = await supabase.from("business_members").insert({
+    business_id: business.id,
+    user_id: user.id,
+    role: "owner",
+  });
+  if (memberError) throw memberError;
+}
+
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
@@ -76,8 +109,11 @@ function AuthPage() {
 
     supabase.auth
       .getUser()
-      .then(({ data }) => {
-        if (active && data.user) navigate({ to: "/dashboard", replace: true });
+      .then(async ({ data }) => {
+        if (active && data.user) {
+          await ensureWorkspace(data.user);
+          navigate({ to: "/dashboard", replace: true });
+        }
       })
       .catch(() => {
         /* Keep the sign-in form available on connection errors. */
@@ -110,6 +146,7 @@ function AuthPage() {
         toast.error("Sign-in didn't complete. Please try again.");
         return;
       }
+      await ensureWorkspace(data.user);
       navigate({ to: "/dashboard", replace: true });
     } catch (error) {
       toast.error(friendlyError(error instanceof Error ? error.message : "network"));
@@ -189,30 +226,9 @@ function AuthPage() {
         return;
       }
       if (data.session) {
-        const { data: business, error: businessError } = await supabase
-          .from("businesses")
-          .insert({
-            owner_id: data.user.id,
-            name: businessName.trim(),
-            slug: normalizedSlug,
-            onboarding_completed: true,
-          })
-          .select("id")
-          .single();
-        if (businessError) {
-          toast.error(friendlyError(businessError.message));
-          return;
-        }
-        const { error: memberError } = await supabase.from("business_members").insert({
-          business_id: business.id,
-          user_id: data.user.id,
-          role: "owner",
-        });
-        if (memberError) {
-          toast.error("Your account was created, but the workspace could not be opened. Please try again.");
-          return;
-        }
-        toast.success("Account created — you have 2 complimentary credits.");
+        if (!data.user) throw new Error("Something went wrong. Please try again.");
+        await ensureWorkspace(data.user);
+        toast.success("Account created.");
         navigate({ to: "/dashboard", replace: true });
         return;
       }
@@ -245,7 +261,7 @@ function AuthPage() {
             <form className="space-y-4" onSubmit={signIn}>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <PasswordInput
+                <Input
                   id="email"
                   type="email"
                   autoComplete="email"
@@ -256,7 +272,7 @@ function AuthPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
-                <Input
+                <PasswordInput
                   id="password"
                   autoComplete="current-password"
                   required
@@ -312,7 +328,7 @@ function AuthPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email2">Email</Label>
-                <PasswordInput
+                <Input
                   id="email2"
                   type="email"
                   autoComplete="email"
@@ -323,7 +339,7 @@ function AuthPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password2">Password</Label>
-                <Input
+                <PasswordInput
                   id="password2"
                   autoComplete="new-password"
                   required
@@ -350,9 +366,6 @@ function AuthPage() {
               <Button className="w-full" disabled={busy}>
                 {busy ? "Creating…" : "Create account"}
               </Button>
-              <p className="text-center text-xs text-muted-foreground">
-                New accounts include 2 complimentary credits.
-              </p>
             </form>
           </TabsContent>
         </Tabs>

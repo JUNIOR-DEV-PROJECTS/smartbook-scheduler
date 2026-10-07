@@ -153,7 +153,7 @@
   .font-display {
     font-family: var(--font-display);
     font-optical-sizing: auto;
-    letter-spacing: -0.015em;
+    letter-spacing: 0;
   }
 }
 

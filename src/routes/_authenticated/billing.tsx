@@ -8,8 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { PLANS, PLAN_LIST } from "@/lib/plans";
 import { selectPlan } from "@/lib/checkout";
 import { Button } from "@/components/ui/button";
-import { useWorkspace } from "@/hooks/useWorkspace";
-import { INITIAL_CREDITS, isPaidPlan, useCredits } from "@/hooks/useCredits";
+import { useSubscription, useWorkspace } from "@/hooks/useWorkspace";
 
 export const Route = createFileRoute("/_authenticated/billing")({
   component: BillingPage,
@@ -17,10 +16,10 @@ export const Route = createFileRoute("/_authenticated/billing")({
 
 function BillingPage() {
   const { data: workspace } = useWorkspace();
-  const { data: credits } = useCredits();
   const business = workspace?.business;
-  const plan = business ? PLANS[business.plan] : undefined;
-  const paid = isPaidPlan(business?.plan_status);
+  const { data: subscription } = useSubscription(business?.id);
+  const plan = subscription?.plan ? PLANS[subscription.plan] : undefined;
+  const paid = subscription?.status === "active" && !!plan;
 
   const monthStart = new Date();
   monthStart.setDate(1);
@@ -48,38 +47,30 @@ function BillingPage() {
 
   return (
     <AppShell title="Billing" description="Your plan and usage">
-      {workspace && business && plan ? (
+      {workspace && business ? (
         <RequireManager role={workspace.role}>
           <div className="space-y-5">
             <div className="surface p-5">
               <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
                 <div className="min-w-0">
                   <h2 className="text-lg font-semibold">
-                    {paid ? `${plan.name} plan` : "No active subscription"}
+                    {paid && plan ? `${plan.name} plan` : "No active subscription"}
                   </h2>
-                  {paid ? (
+                  {paid && plan ? (
                     <p className="text-sm text-muted-foreground">${plan.price} per month</p>
                   ) : null}
                 </div>
                 <Badge variant="secondary">
                   {paid
                     ? "Active"
-                    : business.plan_status === "past_due"
+                    : subscription?.status === "past_due"
                       ? "Past due"
-                      : business.plan_status === "canceled"
+                      : subscription?.status === "canceled"
                         ? "Canceled"
                         : "Not subscribed"}
                 </Badge>
-                {/* "trialing" / "none" both render as Not subscribed: no real trial exists. */}
               </div>
-              {!paid ? (
-                <p className="mt-3 text-sm text-muted-foreground">
-                  Complimentary credits left: <strong>{credits ?? 0}</strong> of {INITIAL_CREDITS}.
-                  Each new booking uses one. When they run out, choose a plan below to continue.
-                </p>
-              ) : null}
-
-              {paid ? (
+              {paid && plan ? (
                 <div className="mt-5 space-y-4">
                   <UsageBar
                     label="Bookings this month"
@@ -109,7 +100,7 @@ function BillingPage() {
                       <li key={f}>{f}</li>
                     ))}
                   </ul>
-                  {paid && p.id === business.plan ? (
+                  {paid && p.id === subscription?.plan ? (
                     <Badge className="mt-4" variant="secondary">
                       Current plan
                     </Badge>
