@@ -187,7 +187,7 @@ export type Database = {
           reminder_hours: number
           slug: string
           timezone: string
-          trial_ends_at: string
+          trial_ends_at: string | null
           updated_at: string
         }
         Insert: {
@@ -215,7 +215,7 @@ export type Database = {
           reminder_hours?: number
           slug: string
           timezone?: string
-          trial_ends_at?: string
+          trial_ends_at?: string | null
           updated_at?: string
         }
         Update: {
@@ -243,7 +243,7 @@ export type Database = {
           reminder_hours?: number
           slug?: string
           timezone?: string
-          trial_ends_at?: string
+          trial_ends_at?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -617,6 +617,59 @@ export type Database = {
           },
         ]
       }
+      subscriptions: {
+        Row: {
+          billing_interval:
+            | Database["public"]["Enums"]["billing_interval"]
+            | null
+          business_id: string
+          created_at: string
+          current_period_end: string | null
+          plan: Database["public"]["Enums"]["plan_tier"] | null
+          provider: string | null
+          provider_customer_id: string | null
+          provider_subscription_id: string | null
+          status: Database["public"]["Enums"]["subscription_status"]
+          updated_at: string
+        }
+        Insert: {
+          billing_interval?:
+            | Database["public"]["Enums"]["billing_interval"]
+            | null
+          business_id: string
+          created_at?: string
+          current_period_end?: string | null
+          plan?: Database["public"]["Enums"]["plan_tier"] | null
+          provider?: string | null
+          provider_customer_id?: string | null
+          provider_subscription_id?: string | null
+          status?: Database["public"]["Enums"]["subscription_status"]
+          updated_at?: string
+        }
+        Update: {
+          billing_interval?:
+            | Database["public"]["Enums"]["billing_interval"]
+            | null
+          business_id?: string
+          created_at?: string
+          current_period_end?: string | null
+          plan?: Database["public"]["Enums"]["plan_tier"] | null
+          provider?: string | null
+          provider_customer_id?: string | null
+          provider_subscription_id?: string | null
+          status?: Database["public"]["Enums"]["subscription_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: true
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -632,6 +685,7 @@ export type Database = {
         | "completed"
         | "cancelled"
         | "no_show"
+      billing_interval: "monthly" | "annual"
       notification_status: "queued" | "sent" | "failed" | "skipped"
       notification_type:
         | "confirmation"
@@ -640,6 +694,13 @@ export type Database = {
         | "cancellation"
       plan_status: "trialing" | "active" | "past_due" | "canceled" | "none"
       plan_tier: "starter" | "pro" | "business"
+      subscription_status:
+        | "none"
+        | "active"
+        | "pending_payment"
+        | "past_due"
+        | "canceled"
+        | "incomplete"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -775,6 +836,7 @@ export const Constants = {
         "cancelled",
         "no_show",
       ],
+      billing_interval: ["monthly", "annual"],
       notification_status: ["queued", "sent", "failed", "skipped"],
       notification_type: [
         "confirmation",
@@ -784,6 +846,14 @@ export const Constants = {
       ],
       plan_status: ["trialing", "active", "past_due", "canceled", "none"],
       plan_tier: ["starter", "pro", "business"],
+      subscription_status: [
+        "none",
+        "active",
+        "pending_payment",
+        "past_due",
+        "canceled",
+        "incomplete",
+      ],
     },
   },
 } as const
