@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/password-input";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/reset-password")({
@@ -42,8 +43,8 @@ function ResetPassword() {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (password.length < 6) {
-      toast.error("Password must be at least 6 characters.");
+    if (password.length < 12) {
+      toast.error("Password must be at least 12 characters.");
       return;
     }
     if (password !== confirm) {
@@ -54,7 +55,12 @@ function ResetPassword() {
     try {
       const { error } = await supabase.auth.updateUser({ password });
       if (error) {
-        toast.error(error.message);
+        const message = error.message.toLowerCase();
+        toast.error(
+          message.includes("weak") || message.includes("pwned") || message.includes("easy to guess")
+            ? "This password is too common or has appeared in data leaks. Use at least 12 characters, mixing words, numbers and symbols."
+            : error.message,
+        );
         return;
       }
       toast.success("Your password has been updated.");
@@ -83,11 +89,14 @@ function ResetPassword() {
           <form className="mt-6 space-y-4" onSubmit={submit}>
             <div className="space-y-2">
               <Label htmlFor="new-password">New password</Label>
-              <Input id="new-password" type="password" autoComplete="new-password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} />
+              <PasswordInput id="new-password" autoComplete="new-password" required minLength={12} value={password} onChange={(e) => setPassword(e.target.value)} aria-describedby="reset-password-rules" />
+              <p id="reset-password-rules" className="text-xs text-muted-foreground">
+                Use at least 12 characters, mixing words, numbers and symbols.
+              </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="confirm-new-password">Confirm new password</Label>
-              <Input id="confirm-new-password" type="password" autoComplete="new-password" required minLength={6} value={confirm} onChange={(e) => setConfirm(e.target.value)} />
+              <PasswordInput id="confirm-new-password" autoComplete="new-password" required minLength={12} value={confirm} onChange={(e) => setConfirm(e.target.value)} />
             </div>
             <Button className="w-full" disabled={busy}>
               {busy ? "Saving…" : "Update password"}

@@ -35,6 +35,7 @@ function Onboarding() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [name, setName] = useState("");
+  const [slug, setSlug] = useState("");
   const [type, setType] = useState("salon");
   const [city, setCity] = useState("");
   const [address, setAddress] = useState("");
@@ -51,13 +52,16 @@ function Onboarding() {
       const userId = auth.user?.id;
       if (!userId) throw new Error("You need to sign in again.");
 
-      const slug = `${slugify(name)}-${Math.random().toString(36).slice(2, 6)}`;
+       const normalizedSlug = slugify(slug || name);
+       if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(normalizedSlug) || normalizedSlug.length < 3 || normalizedSlug.length > 60) {
+         throw new Error("Business URL must be 3–60 lowercase letters, numbers or hyphens.");
+       }
       const { data: business, error } = await supabase
         .from("businesses")
         .insert({
           owner_id: userId,
           name,
-          slug,
+          slug: normalizedSlug,
           business_type: type,
           city,
           address,
@@ -72,47 +76,6 @@ function Onboarding() {
       await supabase
         .from("business_members")
         .insert({ business_id: business.id, user_id: userId, role: "owner" });
-
-      await supabase.from("business_hours").insert(
-        [0, 1, 2, 3, 4, 5, 6].map((weekday) => ({
-          business_id: business.id,
-          weekday,
-          open_time: "09:00",
-          close_time: "17:00",
-          is_closed: weekday === 0,
-        })),
-      );
-
-      const { data: staff } = await supabase
-        .from("staff")
-        .insert({
-          business_id: business.id,
-          user_id: userId,
-          full_name: auth.user?.user_metadata?.["full_name"] || "Me",
-          email: auth.user?.email ?? null,
-          title: "Owner",
-        })
-        .select()
-        .single();
-
-      if (staff) {
-        await supabase.from("staff_availability").insert(
-          [1, 2, 3, 4, 5].map((weekday) => ({
-            business_id: business.id,
-            staff_id: staff.id,
-            weekday,
-            start_time: "09:00",
-            end_time: "17:00",
-          })),
-        );
-      }
-
-      await supabase.from("services").insert({
-        business_id: business.id,
-        name: "Standard appointment",
-        duration_minutes: 45,
-        price_cents: 5000,
-      });
 
       await queryClient.invalidateQueries();
       toast.success("Your business is ready.");
@@ -130,13 +93,16 @@ function Onboarding() {
         <div>
           <h1 className="font-display text-2xl font-semibold">Set up your business</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            We'll create your booking page, opening hours and a first service. You can change
-            everything later.
+            Create your workspace. You can add hours, staff and services from the dashboard.
           </p>
         </div>
         <div className="space-y-2">
           <Label htmlFor="bname">Business name</Label>
-          <Input id="bname" required value={name} onChange={(e) => setName(e.target.value)} />
+          <Input id="bname" required value={name} onChange={(e) => { setName(e.target.value); setSlug(slugify(e.target.value).slice(0, 60)); }} />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="bslug">Business URL</Label>
+          <Input id="bslug" required minLength={3} maxLength={60} pattern="[a-z0-9]+(?:-[a-z0-9]+)*" value={slug} onChange={(e) => setSlug(slugify(e.target.value).slice(0, 60))} />
         </div>
         <div className="space-y-2">
           <Label htmlFor="btype">Type</Label>

@@ -11,7 +11,7 @@ import {
 import { PLAN_LIST } from "@/lib/plans";
 import { selectPlan } from "@/lib/checkout";
 
-/** Shown when the complimentary credits run out. */
+/** Shows available plans without changing subscription data. */
 export function UpgradeDialog({
   open,
   onOpenChange,
@@ -23,9 +23,9 @@ export function UpgradeDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
         <DialogHeader>
-          <DialogTitle>Your complimentary credits are used up</DialogTitle>
+          <DialogTitle>Choose a plan</DialogTitle>
           <DialogDescription>
-            New accounts get 2 complimentary credits. Choose a plan to keep booking.
+            Select a plan for future checkout. No subscription will be created yet.
           </DialogDescription>
         </DialogHeader>
 
