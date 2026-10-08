@@ -418,7 +418,7 @@ export function AppointmentDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button onClick={save} disabled={busy || !slot || outOfCredits}>
+          <Button onClick={save} disabled={busy || !slot}>
             {busy ? "Saving…" : appointment ? "Save changes" : "Book appointment"}
           </Button>
         </DialogFooter>

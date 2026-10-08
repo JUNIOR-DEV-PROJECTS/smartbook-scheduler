@@ -78,7 +78,7 @@ function friendlyError(message: string) {
   if (m.includes("invalid login credentials")) return "Incorrect email or password.";
   if (m.includes("email not confirmed")) return "Confirm your email address, then sign in.";
   if (m.includes("already registered") || m.includes("already been registered"))
-    return "That email already has an account — sign in instead.";
+    return "This email is already registered. Try signing in or reset your password.";
   if (m.includes("weak") || m.includes("pwned") || m.includes("easy to guess"))
     return "This password is too common or has appeared in data leaks. Use at least 12 characters, mixing words, numbers and symbols.";
   if (m.includes("should be at least") || m.includes("at least 12"))
@@ -86,8 +86,9 @@ function friendlyError(message: string) {
   if (m.includes("duplicate") && m.includes("slug")) return "That business URL is already in use.";
   if (m === "timeout") return "The request took too long. Please try again.";
   if (m.includes("rate limit") || m.includes("too many"))
-    return "Muitas tentativas. Aguarde alguns minutos e tente novamente.";
-  return message;
+    return "Too many attempts. Wait a few minutes and try again.";
+  if (m.includes("network") || m.includes("fetch")) return "Something went wrong. Please try again.";
+  return message || "Something went wrong. Please try again.";
 }
 
 function AuthPage() {
